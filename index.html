@@ -38,7 +38,6 @@
     --tooltip-color: #333333;
   }
 
-  /* Темная тема */
   body.dark-theme {
     --bg: #121212;
     --white: #1E1E1E;
@@ -79,7 +78,6 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  /* HEADER */
   .header {
     background: var(--white);
     border-bottom: 1px solid var(--border-color);
@@ -120,7 +118,6 @@
   .btn-danger { background: var(--down); color: #FFFFFF; }
   .btn-danger:hover { filter: brightness(0.85); }
 
-  /* THEME SWITCH - сегментированный */
   .theme-switch {
     display: flex;
     background: var(--bg);
@@ -186,10 +183,8 @@
     flex-shrink: 0;
   }
 
-  /* MAIN */
   .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
 
-  /* KPI */
   .kpi-row-title {
     font-size: 11px;
     color: var(--gray);
@@ -209,22 +204,31 @@
   .kpi-grid.biz .kpi-card:nth-child(n+5) { grid-column: span 4; }
   .kpi-grid.tech { grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
   
-  /* KPI CARDS - Минималистичный вид без цветных фонов */
+  /* ============================================ */
+  /* ИСПРАВЛЕНИЕ БАГОВ: KPI КАРТОЧКИ              */
+  /* ============================================ */
   .kpi-card {
     background: var(--white);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    transition: box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     position: relative;
     z-index: 1;
+    /* ДОБАВЛЕНО: фиксированная высота для вмещения графика */
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    /* ДОБАВЛЕНО: график не вылезает за границы */
+    overflow: hidden;
   }
   .kpi-card:hover {
-    transform: translateY(-4px);
+    /* УДАЛЕНО: transform: translateY(-4px); — убираем прыжок */
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    z-index: 5;
-    overflow: visible;
+    /* ИЗМЕНЕНО: z-index 10 → 2, чтобы не перекрывать фильтры */
+    z-index: 2;
+    /* УДАЛЕНО: overflow: visible; */
   }
   body.dark-theme .kpi-card:hover {
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
@@ -238,6 +242,7 @@
     font-weight: 500;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
   .kpi-dot {
     width: 10px;
@@ -254,11 +259,13 @@
     margin-bottom: 8px;
     white-space: nowrap;
     color: var(--dark);
+    flex-shrink: 0;
   }
   .kpi-sub {
     font-size: 13px;
     color: var(--gray);
     font-weight: 400;
+    flex-shrink: 0;
   }
   .kpi-sub.up { color: var(--ok); }
   .kpi-sub.down { color: var(--down); }
@@ -266,14 +273,22 @@
   .kpi-chart-wrap {
     opacity: 0;
     max-height: 0;
-    transition: all 0.3s ease;
-    overflow: visible;
+    transition: opacity 0.3s ease, max-height 0.3s ease, margin-top 0.3s ease;
+    overflow: hidden;
     position: relative;
+    pointer-events: none;
+    /* ДОБАВЛЕНО: график занимает оставшееся пространство и прижимается к низу */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-top: 0;
   }
   .kpi-card:hover .kpi-chart-wrap {
     opacity: 1;
     max-height: 140px;
     margin-top: 16px;
+    pointer-events: auto;
   }
   .kpi-sparkline {
     width: 100%;
@@ -345,7 +360,9 @@
   .chart-tooltip .tt-change.positive { color: var(--ok); }
   .chart-tooltip .tt-change.negative { color: var(--down); }
 
-  /* FILTERS */
+  /* ============================================ */
+  /* ИСПРАВЛЕНИЕ БАГОВ: ФИЛЬТРЫ И ТАБЛИЦА         */
+  /* ============================================ */
   .filters {
     background: var(--white);
     border: 1px solid var(--border-color);
@@ -358,6 +375,9 @@
     flex-wrap: wrap;
     align-items: center;
     transition: background 0.2s ease, border-color 0.2s ease;
+    /* ДОБАВЛЕНО: защита от перекрытия карточками */
+    position: relative;
+    z-index: 5;
   }
   .filter-group { display: flex; flex-direction: column; gap: 4px; }
   .filter-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -375,7 +395,6 @@
   .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--yellow-dark); }
   .filter-count { margin-left: auto; font-size: 13px; color: var(--gray); align-self: flex-end; padding-bottom: 6px; }
 
-  /* TABLE */
   .table-wrap {
     background: var(--white);
     border: 1px solid var(--border-color);
@@ -383,6 +402,9 @@
     box-shadow: var(--shadow);
     overflow: hidden;
     transition: background 0.2s ease, border-color 0.2s ease;
+    /* ДОБАВЛЕНО: защита от перекрытия карточками */
+    position: relative;
+    z-index: 5;
   }
   .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1140px; }
@@ -476,7 +498,6 @@
   .fix-done { background: var(--ok-bg); color: var(--ok); }
   body.dark-theme .fix-work { background: #3A3418; color: #F5C400; }
 
-  /* DETAIL PANEL */
   .detail-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.3);
@@ -734,7 +755,7 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s;
-    z-index: 5;
+    z-index: 10;
     box-shadow: var(--shadow-lg);
     line-height: 1.4;
   }
@@ -862,7 +883,6 @@
 
   .empty-state { padding: 48px 24px; text-align: center; color: var(--gray); }
 
-  /* RESPONSIVE */
   @media (max-width: 1200px) {
     .kpi-grid.biz .kpi-card { grid-column: span 6 !important; }
     .kpi-grid.tech { grid-template-columns: repeat(2, 1fr); }
@@ -878,7 +898,7 @@
       -ms-overflow-style: none;
     }
     .kpi-grid::-webkit-scrollbar { display: none; }
-    .kpi-card { flex: 0 0 200px; scroll-snap-align: start; padding: 16px; grid-column: auto !important; }
+    .kpi-card { flex: 0 0 200px; scroll-snap-align: start; padding: 16px; grid-column: auto !important; min-height: auto; }
     .kpi-card:hover { transform: none; }
     .kpi-value { font-size: 28px; }
     .header { padding: 12px 16px; }
@@ -943,7 +963,6 @@
     </div>
   </div>
   <div class="header-actions">
-    <!-- Сегментированный переключатель темы -->
     <div class="theme-switch">
       <button class="theme-option active" data-theme="light" title="Светлая тема" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1154,7 +1173,7 @@
       </select>
     </div>
     <div class="filter-group">
-      <div class="filter-label">Устройство (проблемы)</div>
+      <div class="filter-label">Устройство (сбои)</div>
       <select class="filter-select" id="f-device">
         <option value="">Все устройства</option>
         <option value="Desktop Chrome">Desktop Chrome</option>
@@ -1364,7 +1383,6 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script>
-// ============ THEME ============
 function getThemeColors() {
   const style = getComputedStyle(document.body);
   return {
@@ -1384,11 +1402,9 @@ function setTheme(theme) {
     theme = 'light';
   }
   try { localStorage.setItem('tbank_theme', theme); } catch (e) {}
-  // Обновить active класс на кнопках темы
   document.querySelectorAll('.theme-option').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
-  // Даем CSS обновиться перед перерисовкой canvas
   requestAnimationFrame(function() {
     redrawAllCharts();
   });
@@ -1415,7 +1431,6 @@ function redrawAllCharts() {
   } catch (e) {}
 })();
 
-// Обработчики кликов на кнопки темы
 document.querySelectorAll('.theme-option').forEach(function(btn) {
   btn.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -1423,7 +1438,6 @@ document.querySelectorAll('.theme-option').forEach(function(btn) {
   });
 });
 
-// Инициализация активной кнопки при загрузке
 (function() {
   const saved = (function() { try { return localStorage.getItem('tbank_theme'); } catch(e) { return null; } })();
   const currentTheme = saved === 'dark' ? 'dark' : 'light';
@@ -1432,7 +1446,6 @@ document.querySelectorAll('.theme-option').forEach(function(btn) {
   });
 })();
 
-// ============ HELPERS ============
 function H(base, spread, mode, zeroFrom) {
   const arr = [];
   for (let i = 0; i < 12; i++) {
@@ -1475,18 +1488,17 @@ function fmtMwEnd(endStr) {
 
 const LTV_PER_LEAD = 15000;
 
-// ============ MOCK DATA ============
 const LANDINGS = [
-  { id:1,  productName:'Карта Black',               url:'tbank.ru/cards/black',           status:'ok', priority:'critical', devices:dev(), ttfb:320, lcp:1450, lastIncident:'2026-11-03 08:12', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1180, stopLossLimit:50000, campaigns:[{name:'РСЯ_Осень',status:'Активна',spend:12400,url:'https://direct.yandex.ru/campaigns/101',clicks:295,leads:9,bid:42},{name:'Поиск_Бренд',status:'Активна',spend:8600,url:'https://direct.yandex.ru/campaigns/102',clicks:132,leads:11,bid:65}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(320,15,'ok'), lcpHistory:H(1450,60,'ok') },
+  { id:1,  productName:'Карта Black',               url:'tbank.ru/cards/black',           status:'degraded', priority:'critical', devices:dev('Desktop Safari','degraded'), ttfb:1450, lcp:3800, lastIncident:'2026-11-04 10:15', owner:'Иванов А.',   type:'speed', error:'LCP > 4000 мс', duration:'45 мин', loss:18500, leadsLost:2, cpl:1180, stopLossLimit:50000, campaigns:[{name:'РСЯ_Осень',status:'Активна',spend:12400,url:'https://direct.yandex.ru/campaigns/101',clicks:295,leads:9,bid:42},{name:'Поиск_Бренд',status:'Активна',spend:8600,url:'https://direct.yandex.ru/campaigns/102',clicks:132,leads:11,bid:65}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(400,30,'rise'), lcpHistory:H(1800,80,'rise') },
   { id:2,  productName:'Карта Black Premium',       url:'tbank.ru/cards/black-premium',   status:'ok', priority:'critical', devices:dev(), ttfb:350, lcp:1520, lastIncident:'2026-10-30 15:45', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1420, stopLossLimit:50000, campaigns:[{name:'Поиск_Премиум',status:'Активна',spend:15200,url:'https://direct.yandex.ru/campaigns/103',clicks:127,leads:8,bid:120}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(350,15,'ok'), lcpHistory:H(1520,60,'ok') },
-  { id:3,  productName:'Карта Джуниор',             url:'tbank.ru/cards/junior',          status:'ok', priority:'medium',   devices:dev(), ttfb:490, lcp:2150, lastIncident:'2026-11-01 20:30', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:860,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Джуниор',status:'Активна',spend:5400,url:'https://direct.yandex.ru/campaigns/104',clicks:193,leads:6,bid:28}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(490,20,'ok'), lcpHistory:H(2150,70,'ok') },
+  { id:3,  productName:'Карта Джуниор',             url:'tbank.ru/cards/junior',          status:'degraded', priority:'medium',   devices:dev('Mobile Chrome','degraded'), ttfb:1650, lcp:3600, lastIncident:'2026-11-04 09:30', owner:'Новикова Е.', type:'speed', error:'TTFB > 1500 мс', duration:'55 мин', loss:12300, leadsLost:2, cpl:860,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Джуниор',status:'Активна',spend:5400,url:'https://direct.yandex.ru/campaigns/104',clicks:193,leads:6,bid:28}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(490,20,'rise'), lcpHistory:H(2150,70,'rise') },
   { id:4,  productName:'Карта All Airlines',        url:'tbank.ru/cards/all-airlines',    status:'degraded', priority:'high', devices:dev('Desktop Safari','degraded'), ttfb:1850, lcp:4200, lastIncident:'2026-11-04 13:10', owner:'Сидорова М.', type:'speed', error:'LCP > 4000 мс', duration:'75 мин', loss:42100, leadsLost:3, cpl:1400, stopLossLimit:50000, campaigns:[{name:'РСЯ_Осень',status:'Активна',spend:9800,url:'https://direct.yandex.ru/campaigns/105',clicks:245,leads:7,bid:40},{name:'Поиск_Бренд',status:'Активна',spend:7300,url:'https://direct.yandex.ru/campaigns/106',clicks:118,leads:9,bid:62}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(400,30,'rise'), lcpHistory:H(1800,80,'rise') },
   { id:5,  productName:'Карта Drive',               url:'tbank.ru/cards/drive',           status:'ok', priority:'medium',   devices:dev(), ttfb:440, lcp:1980, lastIncident:'2026-10-29 14:20', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:990,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Drive',status:'Активна',spend:6100,url:'https://direct.yandex.ru/campaigns/107',clicks:185,leads:5,bid:33}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(440,20,'ok'), lcpHistory:H(1980,70,'ok') },
-  { id:6,  productName:'Карта S7',                  url:'tbank.ru/cards/s7',              status:'ok', priority:'low',      devices:dev(), ttfb:680, lcp:2950, lastIncident:'2026-10-28 10:05', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1050, stopLossLimit:30000, campaigns:[{name:'РСЯ_S7',status:'Активна',spend:4200,url:'https://direct.yandex.ru/campaigns/108',clicks:140,leads:4,bid:30}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(680,25,'ok'), lcpHistory:H(2950,90,'ok') },
+  { id:6,  productName:'Карта S7',                  url:'tbank.ru/cards/s7',              status:'degraded', priority:'low',      devices:dev('Desktop Chrome','degraded'), ttfb:1400, lcp:3200, lastIncident:'2026-11-04 11:20', owner:'Иванов А.',   type:'speed', error:'TTFB > 1500 мс', duration:'30 мин', loss:8500, leadsLost:1, cpl:1050, stopLossLimit:30000, campaigns:[{name:'РСЯ_S7',status:'Активна',spend:4200,url:'https://direct.yandex.ru/campaigns/108',clicks:140,leads:4,bid:30}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(680,25,'rise'), lcpHistory:H(2950,90,'rise') },
   { id:7,  productName:'Потребительский кредит',    url:'tbank.ru/loans/consumer',        status:'down', priority:'critical', devices:dev('Desktop Chrome','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 14:23', owner:'Петров С.', type:'availability', error:'502 Bad Gateway', duration:'12 мин', loss:184500, leadsLost:8, cpl:1250, stopLossLimit:50000, campaigns:[{name:'Поиск_Кредит',status:'Активна',spend:21500,url:'https://direct.yandex.ru/campaigns/109',clicks:226,leads:14,bid:95},{name:'РСЯ_Кредит',status:'Активна',spend:14800,url:'https://direct.yandex.ru/campaigns/110',clicks:269,leads:10,bid:55}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(420,20,'zero',5), lcpHistory:H(1800,80,'zero',5) },
   { id:8,  productName:'Автокредит',                url:'tbank.ru/loans/auto',            status:'ok', priority:'high',     devices:dev(), ttfb:410, lcp:1820, lastIncident:'2026-11-02 19:30', owner:'Петров С.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1310, stopLossLimit:50000, campaigns:[{name:'Поиск_Авто',status:'Активна',spend:11200,url:'https://direct.yandex.ru/campaigns/111',clicks:140,leads:9,bid:80}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(410,18,'ok'), lcpHistory:H(1820,65,'ok') },
-  { id:9,  productName:'Ипотека: Новостройки',      url:'tbank.ru/loans/mortgage-new',    status:'down', priority:'critical', devices:dev('Mobile Safari','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 14:25', owner:'Козлов Д.',  type:'functionality', error:'Form#app-form not found', duration:'10 мин', loss:267300, leadsLost:6, cpl:2100, stopLossLimit:50000, campaigns:[{name:'Поиск_Ипотека',status:'Активна',spend:32600,url:'https://direct.yandex.ru/campaigns/112',clicks:217,leads:12,bid:150}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,18,'zero',6), lcpHistory:H(1700,70,'zero',6) },
-  { id:10, productName:'СмартВклад',                url:'tbank.ru/deposits/smart',        status:'ok', priority:'high',     devices:dev(), ttfb:380, lcp:1650, lastIncident:'2026-11-03 05:20', owner:'Морозов И.',  type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:740,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Вклады',status:'Активна',spend:8900,url:'https://direct.yandex.ru/campaigns/113',clicks:247,leads:8,bid:36}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,16,'ok'), lcpHistory:H(1650,60,'ok') },
+  { id:9,  productName:'Ипотека: Новостройки',      url:'tbank.ru/loans/mortgage-new',    status:'down', priority:'critical', devices:dev('Mobile Safari','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 14:25', owner:'Козлов Д.',  type:'availability', error:'503 Service Unavailable', duration:'10 мин', loss:267300, leadsLost:6, cpl:2100, stopLossLimit:50000, campaigns:[{name:'Поиск_Ипотека',status:'Активна',spend:32600,url:'https://direct.yandex.ru/campaigns/112',clicks:217,leads:12,bid:150}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,18,'zero',6), lcpHistory:H(1700,70,'zero',6) },
+  { id:10, productName:'СмартВклад',                url:'tbank.ru/deposits/smart',        status:'degraded', priority:'high',     devices:dev('Yandex Browser','degraded'), ttfb:1550, lcp:3500, lastIncident:'2026-11-04 08:40', owner:'Морозов И.',  type:'functionality', error:'Form element missing', duration:'65 мин', loss:15200, leadsLost:2, cpl:740,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Вклады',status:'Активна',spend:8900,url:'https://direct.yandex.ru/campaigns/113',clicks:247,leads:8,bid:36}], fixStatus:'На проверке', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,16,'rise'), lcpHistory:H(1650,60,'rise') },
   { id:11, productName:'Накопительный счет',        url:'tbank.ru/deposits/accumulative', status:'degraded', priority:'high', devices:dev('Mobile Chrome','degraded'), ttfb:1650, lcp:3800, lastIncident:'2026-11-04 12:45', owner:'Морозов И.', type:'speed', error:'TTFB > 1500 мс', duration:'100 мин', loss:28700, leadsLost:2, cpl:950, stopLossLimit:50000, campaigns:[{name:'РСЯ_Накопительный',status:'Активна',spend:6700,url:'https://direct.yandex.ru/campaigns/114',clicks:216,leads:6,bid:31}], fixStatus:'На проверке', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(350,25,'rise'), lcpHistory:H(1600,75,'rise') },
   { id:12, productName:'Брокерский счет',           url:'tbank.ru/invest/broker',         status:'ok', priority:'medium',   devices:dev(), ttfb:510, lcp:2280, lastIncident:'2026-10-31 12:15', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1620, stopLossLimit:50000, campaigns:[{name:'Поиск_Брокер',status:'Активна',spend:10400,url:'https://direct.yandex.ru/campaigns/115',clicks:118,leads:7,bid:88}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(510,20,'ok'), lcpHistory:H(2280,75,'ok') },
   { id:13, productName:'ИИС',                       url:'tbank.ru/invest/iis',            status:'ok', priority:'medium',   devices:dev(), ttfb:610, lcp:2680, lastIncident:'2026-11-02 09:15', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1540, stopLossLimit:50000, campaigns:[{name:'РСЯ_ИИС',status:'Активна',spend:7800,url:'https://direct.yandex.ru/campaigns/116',clicks:166,leads:5,bid:47}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(610,22,'ok'), lcpHistory:H(2680,85,'ok') },
@@ -1498,8 +1510,8 @@ const LANDINGS = [
   { id:19, productName:'Премиум-обслуживание',      url:'tbank.ru/premium',               status:'ok', priority:'high',     devices:dev(), ttfb:390, lcp:1720, lastIncident:'2026-11-01 11:20', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1750, stopLossLimit:50000, campaigns:[{name:'Поиск_Премиум',status:'Активна',spend:12800,url:'https://direct.yandex.ru/campaigns/122',clicks:111,leads:7,bid:115}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(390,16,'ok'), lcpHistory:H(1720,60,'ok') },
   { id:20, productName:'Рефинансирование кредитов', url:'tbank.ru/loans/refinance',       status:'ok', priority:'high',     devices:dev(), ttfb:470, lcp:2080, lastIncident:'2026-10-27 16:40', owner:'Петров С.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1120, stopLossLimit:50000, campaigns:[{name:'РСЯ_Рефинанс',status:'Активна',spend:8300,url:'https://direct.yandex.ru/campaigns/123',clicks:189,leads:6,bid:44}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(470,18,'ok'), lcpHistory:H(2080,70,'ok') },
   { id:21, productName:'Металлический счет',        url:'tbank.ru/invest/metals',         status:'ok', priority:'low',      devices:dev(), ttfb:640, lcp:2820, lastIncident:'—', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1490, stopLossLimit:50000, campaigns:[{name:'РСЯ_Металлы',status:'Активна',spend:6400,url:'https://direct.yandex.ru/campaigns/124',clicks:160,leads:3,bid:40}], fixStatus:null, takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(640,24,'ok'), lcpHistory:H(2820,85,'ok') },
-  { id:22, productName:'Карта Platinum',            url:'tbank.ru/cards/platinum',        status:'ok', priority:'critical', devices:dev(), ttfb:290, lcp:1320, lastIncident:'2026-10-25 09:40', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1380, stopLossLimit:50000, campaigns:[{name:'Поиск_Платинум',status:'Активна',spend:11900,url:'https://direct.yandex.ru/campaigns/125',clicks:113,leads:8,bid:105},{name:'РСЯ_Платинум',status:'Активна',spend:9600,url:'https://direct.yandex.ru/campaigns/126',clicks:200,leads:6,bid:48}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(290,12,'ok'), lcpHistory:H(1320,50,'ok') },
-  { id:23, productName:'Кредит для бизнеса',        url:'tbank.ru/business/loans',        status:'degraded', priority:'medium', devices:dev('Yandex Browser','degraded'), ttfb:980, lcp:2600, lastIncident:'2026-11-04 11:05', owner:'Козлов Д.', type:'security', error:'SSL cert expires in 3 days', duration:'3 ч 30 м', loss:9400, leadsLost:1, cpl:1800, stopLossLimit:50000, campaigns:[{name:'Поиск_Бизнес',status:'Активна',spend:10800,url:'https://direct.yandex.ru/campaigns/127',clicks:117,leads:4,bid:92}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(500,20,'rise'), lcpHistory:H(2100,70,'rise') },
+  { id:22, productName:'Карта Platinum',            url:'tbank.ru/cards/platinum',        status:'degraded', priority:'critical', devices:dev('Yandex Browser','degraded'), ttfb:1300, lcp:3100, lastIncident:'2026-11-04 07:50', owner:'Иванов А.',   type:'speed', error:'TTFB > 1500 мс', duration:'40 мин', loss:9800, leadsLost:1, cpl:1380, stopLossLimit:50000, campaigns:[{name:'Поиск_Платинум',status:'Активна',spend:11900,url:'https://direct.yandex.ru/campaigns/125',clicks:113,leads:8,bid:105},{name:'РСЯ_Платинум',status:'Активна',spend:9600,url:'https://direct.yandex.ru/campaigns/126',clicks:200,leads:6,bid:48}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(290,12,'rise'), lcpHistory:H(1320,50,'rise') },
+  { id:23, productName:'Кредит для бизнеса',        url:'tbank.ru/business/loans',        status:'down', priority:'medium', devices:dev('Mobile Safari','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 13:45', owner:'Козлов Д.', type:'availability', error:'502 Bad Gateway', duration:'3 ч 30 м', loss:9400, leadsLost:1, cpl:1800, stopLossLimit:50000, campaigns:[{name:'Поиск_Бизнес',status:'Активна',spend:10800,url:'https://direct.yandex.ru/campaigns/127',clicks:117,leads:4,bid:92}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(500,20,'zero',5), lcpHistory:H(2100,70,'zero',5) },
   { id:24, productName:'Страхование путешествий',   url:'tbank.ru/insurance/travel',      status:'ok', priority:'low',      devices:dev(), ttfb:560, lcp:2450, lastIncident:'2026-10-24 13:25', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:920,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Travel',status:'Активна',spend:5900,url:'https://direct.yandex.ru/campaigns/128',clicks:184,leads:5,bid:32}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(560,20,'ok'), lcpHistory:H(2450,75,'ok') },
   { id:25, productName:'Зарплатный проект',         url:'tbank.ru/business/salary',       status:'ok', priority:'low',      devices:dev(), ttfb:590, lcp:2560, lastIncident:'—', owner:'Козлов Д.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1660, stopLossLimit:50000, campaigns:[{name:'РСЯ_Зарплатный',status:'Активна',spend:7200,url:'https://direct.yandex.ru/campaigns/129',clicks:157,leads:4,bid:46}], fixStatus:null, takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(590,22,'ok'), lcpHistory:H(2560,80,'ok') }
 ];
