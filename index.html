@@ -1,0 +1,2487 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мониторинг лендингов — Т-Банк</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #FFDD2D;
+    --yellow-dark: #F5C400;
+    --dark: #333333;
+    --dark-soft: #555555;
+    --gray: #8B8B8B;
+    --gray-light: #E5E5E5;
+    --bg: #F5F5F5;
+    --white: #FFFFFF;
+    --ok: #2E7D32;
+    --ok-bg: #E8F5E9;
+    --degraded: #EF6C00;
+    --degraded-bg: #FFF3E0;
+    --down: #C62828;
+    --down-bg: #FFEBEE;
+    --maint: #1565C0;
+    --maint-bg: #E3F2FD;
+    --shadow: 0 2px 4px rgba(0,0,0,0.02);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+
+    --border-color: #EAEAEA;
+    --chart-line: #222222;
+    --chart-fill: rgba(0,0,0,0.06);
+    --chart-dash: #999999;
+    --table-head: #FAFAFA;
+    --table-hover: #FAFAFA;
+    --table-row-border: #F0F0F0;
+    --card-bg-alt: #EEEEEE;
+    --tooltip-bg: #FFFFFF;
+    --tooltip-color: #333333;
+  }
+
+  /* Темная тема */
+  body.dark-theme {
+    --bg: #121212;
+    --white: #1E1E1E;
+    --dark: #F0F0F0;
+    --dark-soft: #CCCCCC;
+    --gray: #999999;
+    --gray-light: #333333;
+    --border-color: #333333;
+    --chart-line: #FFFFFF;
+    --chart-fill: rgba(255,255,255,0.06);
+    --chart-dash: #666666;
+    --table-head: #252525;
+    --table-hover: #2A2A2A;
+    --table-row-border: #2A2A2A;
+    --card-bg-alt: #2A2A2A;
+    --tooltip-bg: #2A2A2A;
+    --tooltip-color: #F0F0F0;
+
+    --ok: #4CAF50;
+    --ok-bg: #1A3A1F;
+    --degraded: #FFA726;
+    --degraded-bg: #3A2A15;
+    --down: #EF5350;
+    --down-bg: #3A1A1A;
+    --maint: #42A5F5;
+    --maint-bg: #1A2A3A;
+
+    --shadow: 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px; min-width: 0; color: var(--dark); }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--yellow);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 18px; color: #333333;
+    flex-shrink: 0;
+  }
+  .logo-sub { font-size: 11px; color: var(--gray); font-weight: 400; }
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--yellow); color: #333333; }
+  .btn-primary:hover { background: var(--yellow-dark); }
+  .btn-secondary { background: var(--white); color: var(--dark); border: 1px solid var(--border-color); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger { background: var(--down); color: #FFFFFF; }
+  .btn-danger:hover { filter: brightness(0.85); }
+
+  /* THEME SWITCH - сегментированный */
+  .theme-switch {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2px;
+    gap: 2px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--gray);
+    transition: all 0.2s;
+    padding: 0;
+  }
+  .theme-option svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+  .theme-option:hover {
+    color: var(--dark);
+  }
+  .theme-option.active {
+    background: var(--white);
+    color: var(--yellow-dark);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  body.dark-theme .theme-option.active {
+    background: var(--gray-light);
+    color: var(--yellow);
+    box-shadow: none;
+  }
+
+  .user-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg);
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    white-space: nowrap;
+    color: var(--dark);
+  }
+  .user-badge:hover { background: var(--gray-light); }
+  .user-avatar {
+    width: 24px; height: 24px;
+    background: var(--yellow);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 11px;
+    color: #333333;
+    flex-shrink: 0;
+  }
+
+  /* MAIN */
+  .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
+
+  /* KPI */
+  .kpi-row-title {
+    font-size: 11px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    margin: 0 0 12px 4px;
+  }
+  .kpi-grid { display: grid; gap: 16px; margin-bottom: 20px; }
+  .kpi-grid.biz {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .kpi-grid.biz .kpi-card:nth-child(-n+4) { grid-column: span 3; }
+  .kpi-grid.biz .kpi-card:nth-child(n+5) { grid-column: span 4; }
+  .kpi-grid.tech { grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
+  
+  /* KPI CARDS - Минималистичный вид без цветных фонов */
+  .kpi-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    z-index: 10;
+    overflow: visible;
+  }
+  body.dark-theme .kpi-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .kpi-label {
+    font-size: 13px;
+    color: var(--dark-soft);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-bottom: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+  .kpi-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .kpi-value {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    color: var(--dark);
+  }
+  .kpi-sub {
+    font-size: 13px;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .kpi-sub.up { color: var(--ok); }
+  .kpi-sub.down { color: var(--down); }
+
+  .kpi-chart-wrap {
+    opacity: 0;
+    max-height: 0;
+    transition: all 0.3s ease;
+    overflow: visible;
+    position: relative;
+  }
+  .kpi-card:hover .kpi-chart-wrap {
+    opacity: 1;
+    max-height: 140px;
+    margin-top: 16px;
+  }
+  .kpi-sparkline {
+    width: 100%;
+    height: 80px;
+    display: block;
+    margin-bottom: 8px;
+    cursor: crosshair;
+  }
+  .kpi-periods {
+    display: flex;
+    gap: 6px;
+    font-size: 11px;
+    justify-content: flex-end;
+  }
+  .kpi-period {
+    cursor: pointer;
+    color: var(--gray);
+    padding: 3px 10px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+    font-weight: 500;
+  }
+  .kpi-period:hover { background: var(--bg); }
+  .kpi-period.active {
+    background: var(--dark);
+    color: var(--white);
+    font-weight: 700;
+  }
+  body.dark-theme .kpi-period.active {
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+  .chart-tooltip {
+    position: fixed;
+    background: var(--tooltip-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--tooltip-color);
+    font-size: 12px;
+    min-width: 140px;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    line-height: 1.5;
+  }
+  body.dark-theme .chart-tooltip {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .chart-tooltip .tt-date {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--dark);
+  }
+  .chart-tooltip .tt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .chart-tooltip .tt-row:last-child { margin-bottom: 0; }
+  .chart-tooltip .tt-label { color: var(--gray); font-size: 11px; }
+  .chart-tooltip .tt-value { font-weight: 700; font-size: 13px; color: var(--dark); }
+  .chart-tooltip .tt-change { font-weight: 600; font-size: 12px; }
+  .chart-tooltip .tt-change.positive { color: var(--ok); }
+  .chart-tooltip .tt-change.negative { color: var(--down); }
+
+  /* FILTERS */
+  .filters {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-select, .filter-input {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--white);
+    color: var(--dark);
+    min-width: 150px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .filter-input { min-width: 220px; }
+  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--yellow-dark); }
+  .filter-count { margin-left: auto; font-size: 13px; color: var(--gray); align-self: flex-end; padding-bottom: 6px; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1140px; }
+  thead { background: var(--table-head); }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    background: var(--table-head);
+    transition: color 0.15s, background 0.15s;
+  }
+  th:hover { color: var(--dark); }
+  th .sort-icon { margin-left: 4px; opacity: 0.25; font-size: 11px; display: inline-block; transition: opacity 0.15s; }
+  th:hover .sort-icon { opacity: 0.5; }
+  th.sorted { color: var(--dark); }
+  th.sorted .sort-icon { opacity: 1; font-weight: 700; }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--table-row-border);
+    vertical-align: middle;
+    color: var(--dark);
+  }
+  tbody tr { cursor: pointer; transition: background 0.1s; }
+  tbody tr:hover { background: var(--table-hover); }
+
+  .product-cell { font-weight: 600; white-space: nowrap; color: var(--dark); }
+  .url-cell {
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 12px;
+    color: var(--dark-soft);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dev-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 12px; color: var(--dark-soft); }
+  .dev-dots { display: inline-flex; gap: 3px; }
+  .dev-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-ok { background: var(--ok); }
+  .dot-degraded { background: var(--degraded); }
+  .dot-down { background: var(--down); animation: pulse 1.5s infinite; }
+  .dot-maintenance { background: var(--maint); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge-degraded { background: var(--degraded-bg); color: var(--degraded); }
+  .badge-down { background: var(--down-bg); color: var(--down); }
+  .badge-maint { background: var(--maint-bg); color: var(--maint); }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .badge-ok .badge-dot { background: var(--ok); }
+  .badge-degraded .badge-dot { background: var(--degraded); }
+  .badge-down .badge-dot { background: var(--down); animation: pulse 1.5s infinite; }
+  .badge-maint .badge-dot { background: var(--maint); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .priority-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .priority-critical { background: var(--down-bg); color: var(--down); }
+  .priority-high { background: var(--degraded-bg); color: var(--degraded); }
+  .priority-medium { background: #FFF9C4; color: #F57F17; }
+  .priority-low { background: var(--gray-light); color: var(--gray); }
+  body.dark-theme .priority-medium { background: #3A3418; color: #F5C400; }
+  body.dark-theme .priority-low { color: #CCCCCC; }
+
+  .metric-cell { font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 12px; color: var(--dark-soft); }
+  .metric-cell.good { color: var(--ok); }
+  .metric-cell.warn { color: var(--degraded); }
+  .metric-cell.bad { color: var(--down); }
+
+  .fix-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .fix-new { background: var(--card-bg-alt); color: var(--dark-soft); }
+  .fix-work { background: #FFF9C4; color: #F57F17; }
+  .fix-check { background: var(--maint-bg); color: var(--maint); }
+  .fix-done { background: var(--ok-bg); color: var(--ok); }
+  body.dark-theme .fix-work { background: #3A3418; color: #F5C400; }
+
+  /* DETAIL PANEL */
+  .detail-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  body.dark-theme .detail-overlay { background: rgba(0,0,0,0.6); }
+  .detail-overlay.open { opacity: 1; pointer-events: auto; }
+  .detail-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 650px; max-width: 100%;
+    background: var(--white);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+    overflow-y: auto;
+    color: var(--dark);
+  }
+  body.dark-theme .detail-panel { box-shadow: -4px 0 20px rgba(0,0,0,0.5); }
+  .detail-panel.open { transform: translateX(0); }
+  .detail-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .detail-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--dark); }
+  .detail-subtitle { font-size: 12px; color: var(--gray); font-family: monospace; word-break: break-all; }
+  .detail-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray); padding: 0 8px; }
+  .detail-close:hover { color: var(--dark); }
+  .detail-body { padding: 24px; }
+  .detail-section { margin-bottom: 24px; }
+  .detail-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); margin-bottom: 12px; font-weight: 600; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .detail-field { padding: 10px 12px; background: var(--card-bg-alt); border-radius: 8px; transition: background 0.15s; }
+  .detail-field-label { font-size: 11px; color: var(--gray); margin-bottom: 4px; }
+  .detail-field-value { font-size: 13px; font-weight: 600; word-break: break-word; color: var(--dark); }
+  .matrix-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--card-bg-alt);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--dark);
+    transition: background 0.15s;
+  }
+  .matrix-row:last-child { margin-bottom: 0; }
+
+  .campaign-accordion {
+    background: var(--card-bg-alt);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    transition: background 0.15s;
+  }
+  .campaign-accordion:last-of-type { margin-bottom: 0; }
+  .campaign-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .campaign-header:hover { filter: brightness(0.95); }
+  body.dark-theme .campaign-header:hover { filter: brightness(1.2); }
+  .camp-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--dark);
+  }
+  .camp-spend {
+    font-size: 12px;
+    color: var(--gray);
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .acc-arrow {
+    color: var(--gray);
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .campaign-accordion.open .acc-arrow { transform: rotate(180deg); }
+  .campaign-body {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+  }
+  .campaign-accordion.open .campaign-body {
+    max-height: 320px;
+    padding: 4px 12px 12px 12px;
+  }
+  .camp-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .camp-metric { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; transition: background 0.15s, border-color 0.15s; }
+  .camp-metric-label { font-size: 11px; color: var(--gray); margin-bottom: 2px; }
+  .camp-metric-value { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .camp-link-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dark);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .camp-link-btn:hover { background: var(--bg); border-color: var(--gray); }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #888888;
+    border-radius: 20px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    top: 2px; left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--ok); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+  .traffic-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .traffic-stop { background: transparent; color: var(--down); border: 1px solid var(--down); }
+  .traffic-stop:hover { background: var(--down-bg); }
+  .traffic-resume { background: transparent; color: var(--ok); border: 1px solid var(--ok); }
+  .traffic-resume:hover { background: var(--ok-bg); }
+  .stoploss-text { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--dark); }
+  .progress-bar { height: 8px; background: var(--card-bg-alt); border-radius: 4px; overflow: hidden; margin-bottom: 12px; transition: background 0.15s; }
+  .progress-bar.pulse { animation: barPulse 0.45s ease; }
+  @keyframes barPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 221, 45, 0.75); }
+    100% { box-shadow: 0 0 0 10px rgba(255, 221, 45, 0); }
+  }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; background: var(--yellow-dark); }
+  .stoploss-limit { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--gray); }
+  .stoploss-limit input {
+    width: 140px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--white);
+    color: var(--dark);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .stoploss-limit input:focus { outline: none; border-color: var(--yellow-dark); }
+  .screenshot-placeholder {
+    width: 100%; height: 140px;
+    background: linear-gradient(135deg, var(--card-bg-alt) 0%, var(--bg) 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gray); font-size: 13px;
+    border: 2px dashed var(--border-color);
+    text-align: center; padding: 16px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .escalation-note {
+    padding: 12px 16px;
+    background: var(--down-bg);
+    border: 1px solid var(--down);
+    border-radius: 8px;
+    color: var(--down);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .detail-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+  .maint-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .action-btn-wrap { position: relative; }
+  .action-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    color: var(--dark);
+  }
+  .action-btn:hover:not(:disabled) { background: var(--bg); border-color: var(--gray); }
+  .action-btn.primary { background: var(--yellow); border-color: var(--yellow-dark); color: #333333; }
+  .action-btn.primary:hover:not(:disabled) { background: var(--yellow-dark); }
+  .action-btn:disabled { opacity: 0.55; cursor: not-allowed; background: var(--bg); border-color: var(--border-color); color: var(--gray); }
+  .taken-note { margin-top: 6px; font-size: 12px; color: var(--ok); font-weight: 700; text-align: center; }
+  .action-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark);
+    color: var(--bg);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 240px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+    box-shadow: var(--shadow-lg);
+    line-height: 1.4;
+  }
+  .action-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--dark);
+  }
+  .action-btn-wrap:hover .action-tooltip { opacity: 1; }
+  .maint-note {
+    padding: 14px 16px;
+    background: var(--maint-bg);
+    border: 1px solid var(--maint);
+    border-radius: 8px;
+    color: var(--maint);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+  .maint-note.ok-note {
+    background: var(--ok-bg);
+    border-color: var(--ok);
+    color: var(--ok);
+    font-weight: 600;
+  }
+
+  canvas.sparkline { width: 100%; height: 80px; display: block; }
+  .chart-legend { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; color: var(--gray); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  body.dark-theme .modal-overlay { background: rgba(0,0,0,0.7); }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    width: 440px;
+    max-width: 90%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    color: var(--dark);
+  }
+  body.dark-theme .modal { box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--dark); }
+  .modal-text { font-size: 14px; color: var(--dark-soft); margin-bottom: 8px; line-height: 1.5; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; font-size: 12px; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .modal-field select, .modal-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--white);
+    color: var(--dark);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .modal-field select:focus, .modal-field input:focus { outline: none; border-color: var(--yellow-dark); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  .dropdown-wrap { position: relative; }
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 220px;
+    padding: 4px;
+    z-index: 150;
+    opacity: 0; pointer-events: none;
+    transform: translateY(-4px);
+    transition: all 0.15s;
+  }
+  .dropdown-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--dark);
+    transition: background 0.1s;
+  }
+  .dropdown-item:hover { background: var(--bg); }
+  .dropdown-item.danger { color: var(--down); font-weight: 600; }
+  .dropdown-item.danger:hover { background: var(--down-bg); }
+  .dropdown-sep { height: 1px; background: var(--border-color); margin: 4px 0; }
+  .submenu { display: none; margin: 2px 0 2px 10px; padding-left: 10px; border-left: 2px solid var(--border-color); }
+  .submenu.open { display: block; }
+
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 400; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--dark);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.2s ease, toastOut 0.3s ease 2.7s forwards;
+    max-width: 340px;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
+
+  .empty-state { padding: 48px 24px; text-align: center; color: var(--gray); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1200px) {
+    .kpi-grid.biz .kpi-card { grid-column: span 6 !important; }
+    .kpi-grid.tech { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .kpi-grid, .kpi-grid.biz, .kpi-grid.tech {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .kpi-grid::-webkit-scrollbar { display: none; }
+    .kpi-card { flex: 0 0 200px; scroll-snap-align: start; padding: 16px; grid-column: auto !important; }
+    .kpi-card:hover { transform: none; }
+    .kpi-value { font-size: 28px; }
+    .header { padding: 12px 16px; }
+    .main { padding: 16px; }
+    .filters { flex-direction: column; align-items: stretch; }
+    .filter-select, .filter-input { min-width: auto; width: 100%; }
+    .detail-panel { width: 100%; }
+    .detail-actions, .maint-actions { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr 1fr; }
+    .table-scroll { display: none; }
+    .card-view { display: block; padding: 12px; }
+    .landing-card {
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid transparent;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .landing-card.ok { border-left-color: var(--ok); }
+    .landing-card.degraded { border-left-color: var(--degraded); }
+    .landing-card.down { border-left-color: var(--down); }
+    .landing-card.maintenance { border-left-color: var(--maint); }
+    .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+    .card-row:last-child { margin-bottom: 0; }
+    .card-label { font-size: 11px; color: var(--gray); flex-shrink: 0; }
+    .card-value { font-size: 13px; font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; color: var(--dark); }
+    .card-title {
+      text-align: left;
+      font-weight: 700;
+      font-size: 14px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--dark);
+    }
+    .card-head { justify-content: space-between; }
+    .card-head .badge { flex-shrink: 0; }
+  }
+  @media (min-width: 768px) { .card-view { display: none; } }
+  @media (max-width: 480px) {
+    .logo-sub { display: none; }
+    .user-badge .user-label { display: none; }
+    .header { padding: 10px 12px; }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">Т</div>
+    <div>
+      <div>Мониторинг лендингов</div>
+      <div class="logo-sub">tbank.ru · production</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <!-- Сегментированный переключатель темы -->
+    <div class="theme-switch">
+      <button class="theme-option active" data-theme="light" title="Светлая тема" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+      </button>
+      <button class="theme-option" data-theme="dark" title="Темная тема" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="dropdown-wrap">
+      <div class="user-badge" id="user-badge">
+        <div class="user-avatar">П</div>
+        <span class="user-label">Пользователь</span>
+        <span style="font-size:10px;color:var(--gray);">▾</span>
+      </div>
+      <div class="dropdown-menu" id="user-menu">
+        <button class="dropdown-item" data-action="profile">Профиль</button>
+        <button class="dropdown-item" data-action="settings">Настройки</button>
+        <button class="dropdown-item" data-action="mw">Плановые работы</button>
+        <button class="dropdown-item" id="reports-toggle">Отчеты <span style="float:right;color:var(--gray);">▸</span></button>
+        <div class="submenu" id="reports-submenu">
+          <button class="dropdown-item" data-action="csv">Скачать CSV</button>
+          <button class="dropdown-item" data-action="pdf">Скачать PDF</button>
+        </div>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item danger" data-action="logout">Выйти</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="kpi-row-title">Бизнес-метрики</div>
+  <div class="kpi-grid biz">
+    <div class="kpi-card" data-kpi="incidents">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--down);"></span>Активные инциденты</div>
+      <div class="kpi-value" id="kpi-incidents">—</div>
+      <div class="kpi-sub" id="kpi-incidents-sub">—</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="loss">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--down);"></span>Потери бюджета сегодня</div>
+      <div class="kpi-value" id="kpi-loss">—</div>
+      <div class="kpi-sub" id="kpi-loss-sub">—</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="lostProfit">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--down);"></span>Упущенная прибыль</div>
+      <div class="kpi-value" id="kpi-lost-profit">—</div>
+      <div class="kpi-sub">оценка LTV потерянных лидов</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="leads">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--degraded);"></span>Потеряно заявок</div>
+      <div class="kpi-value" id="kpi-leads">—</div>
+      <div class="kpi-sub">оценка по конверсии</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="cr">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--degraded);"></span>Конверсия (CR)</div>
+      <div class="kpi-value" id="kpi-cr">—</div>
+      <div class="kpi-sub">доля потерянных лидов от трафика</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="cpl">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--ok);"></span>Средний CPL</div>
+      <div class="kpi-value" id="kpi-cpl">—</div>
+      <div class="kpi-sub">за заявку по инцидентам</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="campaigns">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--degraded);"></span>Затронутые кампании</div>
+      <div class="kpi-value" id="kpi-campaigns">—</div>
+      <div class="kpi-sub">рекламных кампаний</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-row-title">Технические метрики</div>
+  <div class="kpi-grid tech">
+    <div class="kpi-card" data-kpi="uptime">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--ok);"></span>Uptime (30д)</div>
+      <div class="kpi-value">99.94%</div>
+      <div class="kpi-sub up">▲ 0.02% к прошлой неделе</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="coverage">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--ok);"></span>Покрытие</div>
+      <div class="kpi-value" id="kpi-coverage">—</div>
+      <div class="kpi-sub">лендингов под мониторингом</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="mtta">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--degraded);"></span>MTTA (7д)</div>
+      <div class="kpi-value">12<span style="font-size:14px;color:var(--gray)"> мин</span></div>
+      <div class="kpi-sub up">▼ 3 мин к прошлой неделе</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card" data-kpi="mttr">
+      <div class="kpi-label"><span class="kpi-dot" style="background: var(--ok);"></span>MTTR (7д)</div>
+      <div class="kpi-value">38<span style="font-size:14px;color:var(--gray)"> мин</span></div>
+      <div class="kpi-sub up">▼ 12 мин к прошлой неделе</div>
+      <div class="kpi-chart-wrap">
+        <canvas class="kpi-sparkline"></canvas>
+        <div class="kpi-periods">
+          <span class="kpi-period active" data-period="7">7д</span>
+          <span class="kpi-period" data-period="30">30д</span>
+          <span class="kpi-period" data-period="90">90д</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <div class="filter-label">Статус</div>
+      <select class="filter-select" id="f-status">
+        <option value="">Все статусы</option>
+        <option value="down">Down</option>
+        <option value="degraded">Degraded</option>
+        <option value="ok">OK</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Приоритет</div>
+      <select class="filter-select" id="f-priority">
+        <option value="">Все приоритеты</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Устройство (проблемы)</div>
+      <select class="filter-select" id="f-device">
+        <option value="">Все устройства</option>
+        <option value="Desktop Chrome">Desktop Chrome</option>
+        <option value="Desktop Safari">Desktop Safari</option>
+        <option value="Mobile Chrome">Mobile Chrome</option>
+        <option value="Mobile Safari">Mobile Safari</option>
+        <option value="Yandex Browser">Yandex Browser</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Тип проблемы</div>
+      <select class="filter-select" id="f-type">
+        <option value="">Все типы</option>
+        <option value="availability">Доступность</option>
+        <option value="functionality">Функциональность</option>
+        <option value="speed">Скорость</option>
+        <option value="security">Безопасность</option>
+      </select>
+    </div>
+    <div class="filter-group" style="flex:1;min-width:220px;">
+      <div class="filter-label">Поиск</div>
+      <input type="text" class="filter-input" id="f-search" placeholder="Поиск по продукту или URL...">
+    </div>
+    <div class="filter-count" id="filter-count">Показано: 0</div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table id="landings-table">
+        <thead>
+          <tr>
+            <th data-sort="status">Статус <span class="sort-icon">↕</span></th>
+            <th data-sort="productName">Продукт <span class="sort-icon">↕</span></th>
+            <th data-sort="url">URL <span class="sort-icon">↕</span></th>
+            <th data-sort="priority">Приоритет <span class="sort-icon">↕</span></th>
+            <th data-sort="devices">Статус устройств <span class="sort-icon">↕</span></th>
+            <th data-sort="ttfb">TTFB <span class="sort-icon">↕</span></th>
+            <th data-sort="lcp">LCP <span class="sort-icon">↕</span></th>
+            <th data-sort="loss">Потери <span class="sort-icon">↕</span></th>
+            <th data-sort="lastIncident">Последний инцидент <span class="sort-icon">↕</span></th>
+            <th data-sort="owner">Владелец <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="card-view" id="card-view"></div>
+  </div>
+</main>
+
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+<aside class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div>
+      <div class="detail-title" id="d-title">—</div>
+      <div class="detail-subtitle" id="d-url">—</div>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">×</button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-section">
+      <div class="detail-section-title">Статус инцидента</div>
+      <div id="d-status"></div>
+    </div>
+
+    <div class="escalation-note" id="d-escalated" style="display:none;">Эскалировано руководителю IT</div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Статус исправления</div>
+      <div id="d-fix"></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Детали</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="detail-field-label">Код ошибки</div>
+          <div class="detail-field-value" id="d-error">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Тип проблемы</div>
+          <div class="detail-field-value" id="d-type">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Время начала</div>
+          <div class="detail-field-value" id="d-time">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Длительность</div>
+          <div class="detail-field-value" id="d-duration">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Владелец</div>
+          <div class="detail-field-value" id="d-owner">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Потери бюджета</div>
+          <div class="detail-field-value" id="d-loss">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Матрица устройств</div>
+      <div id="d-matrix"></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Рекламные кампании</div>
+      <div id="d-campaigns"></div>
+      <button class="traffic-btn traffic-stop" id="d-traffic-btn" onclick="toggleTraffic()">Остановить весь трафик</button>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Стоп-лосс (авто-пауза)</div>
+      <div class="stoploss-text" id="d-stoploss-text">—</div>
+      <div class="progress-bar" id="d-stoploss-bar"><div class="progress-fill" id="d-stoploss-fill" style="width:0%"></div></div>
+      <div class="stoploss-limit">
+        <label for="d-stoploss-input">Лимит потерь, ₽</label>
+        <input type="number" id="d-stoploss-input" min="1000" step="1000" oninput="updateLimit(this.value)">
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Скриншот на момент инцидента</div>
+      <div class="screenshot-placeholder">
+        Скриншот будет прикреплён автоматически<br>
+        <span style="font-size:11px;margin-top:4px;display:block;">(плейсхолдер прототипа)</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Метрики за последние проверки</div>
+      <canvas class="sparkline" id="sparkline" width="600" height="80"></canvas>
+      <div class="chart-legend">
+        <span><span class="legend-dot" style="background:#FFDD2D"></span>TTFB (мс)</span>
+        <span><span class="legend-dot" style="background:var(--chart-line)"></span>LCP (мс / 10)</span>
+      </div>
+    </div>
+
+    <div class="detail-actions" id="detail-actions">
+      <div class="action-btn-wrap">
+        <div class="action-tooltip">Подтвердить, что инцидент замечен. Остановить эскалацию.</div>
+        <button class="action-btn primary" id="btn-ack" onclick="takeWork()">Взять в работу</button>
+        <div class="taken-note" id="d-taken" style="display:none;"></div>
+      </div>
+      <div class="action-btn-wrap">
+        <div class="action-tooltip">Передать инцидент руководителю или владельцу лендинга.</div>
+        <button class="action-btn" onclick="escalate()">Эскалация</button>
+      </div>
+      <div class="action-btn-wrap">
+        <div class="action-tooltip">Отметить как ложное срабатывание. Исключить из статистики и обнулить потери.</div>
+        <button class="action-btn" onclick="falsePositive()">Ложное</button>
+      </div>
+      <div class="action-btn-wrap">
+        <div class="action-tooltip">Добавить лендинг в окно тех. работ. Отключить алерты.</div>
+        <button class="action-btn" onclick="openMwFromDetail()">Плановые работы</button>
+      </div>
+    </div>
+
+    <div class="maint-actions" id="maint-actions" style="display:none;">
+      <button class="btn btn-secondary" onclick="editMw()">Редактировать работы</button>
+      <button class="btn btn-secondary" onclick="cancelMw()">Отменить работы</button>
+    </div>
+
+    <div class="maint-note" id="d-maint" style="display:none;"></div>
+  </div>
+</aside>
+
+<div class="modal-overlay" id="mw-modal">
+  <div class="modal">
+    <div class="modal-title">Плановые работы</div>
+    <div class="modal-field">
+      <label>Выберите лендинг</label>
+      <select id="mw-landing">
+        <option value="">— выберите —</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Дата и время начала</label>
+      <input type="datetime-local" id="mw-start">
+    </div>
+    <div class="modal-field">
+      <label>Дата и время окончания</label>
+      <input type="datetime-local" id="mw-end-input">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMwModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveMw()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="logout-modal">
+  <div class="modal" style="width:380px;">
+    <div class="modal-title">Выход из системы</div>
+    <div class="modal-text">Вы уверены, что хотите выйти из системы?</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="logout-cancel">Отмена</button>
+      <button class="btn btn-danger" id="logout-confirm">Выйти</button>
+    </div>
+  </div>
+</div>
+
+<div class="chart-tooltip" id="chart-tooltip"></div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ============ THEME ============
+function getThemeColors() {
+  const style = getComputedStyle(document.body);
+  return {
+    chartLine: style.getPropertyValue('--chart-line').trim() || '#222222',
+    chartFill: style.getPropertyValue('--chart-fill').trim() || 'rgba(0,0,0,0.06)',
+    chartDash: style.getPropertyValue('--chart-dash').trim() || '#999999',
+    white: style.getPropertyValue('--white').trim() || '#FFFFFF',
+    yellow: style.getPropertyValue('--yellow').trim() || '#FFDD2D'
+  };
+}
+
+function setTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+    theme = 'light';
+  }
+  try { localStorage.setItem('tbank_theme', theme); } catch (e) {}
+  // Обновить active класс на кнопках темы
+  document.querySelectorAll('.theme-option').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+  // Даем CSS обновиться перед перерисовкой canvas
+  requestAnimationFrame(function() {
+    redrawAllCharts();
+  });
+}
+
+function redrawAllCharts() {
+  document.querySelectorAll('.kpi-card[data-kpi]').forEach(function(card) {
+    if (card._kpiChartData) {
+      drawKpiChart(card, card._kpiChartData.kpiKey, card._kpiChartData.period, null);
+    }
+  });
+  if (typeof currentDetailId !== 'undefined' && currentDetailId !== null) {
+    const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+    if (l) drawSparkline(l.ttfbHistory, l.lcpHistory);
+  }
+}
+
+(function() {
+  try {
+    const saved = localStorage.getItem('tbank_theme');
+    if (saved === 'dark') {
+      document.body.classList.add('dark-theme');
+    }
+  } catch (e) {}
+})();
+
+// Обработчики кликов на кнопки темы
+document.querySelectorAll('.theme-option').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    setTheme(btn.dataset.theme);
+  });
+});
+
+// Инициализация активной кнопки при загрузке
+(function() {
+  const saved = (function() { try { return localStorage.getItem('tbank_theme'); } catch(e) { return null; } })();
+  const currentTheme = saved === 'dark' ? 'dark' : 'light';
+  document.querySelectorAll('.theme-option').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+  });
+})();
+
+// ============ HELPERS ============
+function H(base, spread, mode, zeroFrom) {
+  const arr = [];
+  for (let i = 0; i < 12; i++) {
+    if (mode === 'zero' && i >= zeroFrom) { arr.push(0); continue; }
+    if (mode === 'rise') { arr.push(Math.round(base * (1 + i * 0.14))); continue; }
+    arr.push(Math.round(base + Math.sin(i * 1.7) * spread));
+  }
+  return arr;
+}
+
+const DEV_NAMES = ['Desktop Chrome', 'Desktop Safari', 'Mobile Chrome', 'Mobile Safari', 'Yandex Browser'];
+const DEV_SHORT = {
+  'Desktop Chrome': 'Desk.Chrome',
+  'Desktop Safari': 'Desk.Safari',
+  'Mobile Chrome': 'Mob.Chrome',
+  'Mobile Safari': 'Mob.Safari',
+  'Yandex Browser': 'Yandex'
+};
+
+function dev(problemName, problemStatus, forceStatus) {
+  return DEV_NAMES.map(function(n) {
+    return { name: n, status: forceStatus || (n === problemName ? problemStatus : 'ok') };
+  });
+}
+
+function fmtMoney(n) { return Math.round(n).toLocaleString('ru-RU') + ' ₽'; }
+function fmtNumber(n) { return Math.round(n).toLocaleString('ru-RU'); }
+function nowTime() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function fmtMwEnd(endStr) {
+  const d = new Date(endStr);
+  const now = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  if (d.toDateString() === now.toDateString()) return hh + ':' + mm;
+  return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + ' ' + hh + ':' + mm;
+}
+
+const LTV_PER_LEAD = 15000;
+
+// ============ MOCK DATA ============
+const LANDINGS = [
+  { id:1,  productName:'Карта Black',               url:'tbank.ru/cards/black',           status:'ok', priority:'critical', devices:dev(), ttfb:320, lcp:1450, lastIncident:'2026-11-03 08:12', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1180, stopLossLimit:50000, campaigns:[{name:'РСЯ_Осень',status:'Активна',spend:12400,url:'https://direct.yandex.ru/campaigns/101',clicks:295,leads:9,bid:42},{name:'Поиск_Бренд',status:'Активна',spend:8600,url:'https://direct.yandex.ru/campaigns/102',clicks:132,leads:11,bid:65}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(320,15,'ok'), lcpHistory:H(1450,60,'ok') },
+  { id:2,  productName:'Карта Black Premium',       url:'tbank.ru/cards/black-premium',   status:'ok', priority:'critical', devices:dev(), ttfb:350, lcp:1520, lastIncident:'2026-10-30 15:45', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1420, stopLossLimit:50000, campaigns:[{name:'Поиск_Премиум',status:'Активна',spend:15200,url:'https://direct.yandex.ru/campaigns/103',clicks:127,leads:8,bid:120}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(350,15,'ok'), lcpHistory:H(1520,60,'ok') },
+  { id:3,  productName:'Карта Джуниор',             url:'tbank.ru/cards/junior',          status:'ok', priority:'medium',   devices:dev(), ttfb:490, lcp:2150, lastIncident:'2026-11-01 20:30', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:860,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Джуниор',status:'Активна',spend:5400,url:'https://direct.yandex.ru/campaigns/104',clicks:193,leads:6,bid:28}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(490,20,'ok'), lcpHistory:H(2150,70,'ok') },
+  { id:4,  productName:'Карта All Airlines',        url:'tbank.ru/cards/all-airlines',    status:'degraded', priority:'high', devices:dev('Desktop Safari','degraded'), ttfb:1850, lcp:4200, lastIncident:'2026-11-04 13:10', owner:'Сидорова М.', type:'speed', error:'LCP > 4000 мс', duration:'75 мин', loss:42100, leadsLost:3, cpl:1400, stopLossLimit:50000, campaigns:[{name:'РСЯ_Осень',status:'Активна',spend:9800,url:'https://direct.yandex.ru/campaigns/105',clicks:245,leads:7,bid:40},{name:'Поиск_Бренд',status:'Активна',spend:7300,url:'https://direct.yandex.ru/campaigns/106',clicks:118,leads:9,bid:62}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(400,30,'rise'), lcpHistory:H(1800,80,'rise') },
+  { id:5,  productName:'Карта Drive',               url:'tbank.ru/cards/drive',           status:'ok', priority:'medium',   devices:dev(), ttfb:440, lcp:1980, lastIncident:'2026-10-29 14:20', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:990,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Drive',status:'Активна',spend:6100,url:'https://direct.yandex.ru/campaigns/107',clicks:185,leads:5,bid:33}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(440,20,'ok'), lcpHistory:H(1980,70,'ok') },
+  { id:6,  productName:'Карта S7',                  url:'tbank.ru/cards/s7',              status:'ok', priority:'low',      devices:dev(), ttfb:680, lcp:2950, lastIncident:'2026-10-28 10:05', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1050, stopLossLimit:30000, campaigns:[{name:'РСЯ_S7',status:'Активна',spend:4200,url:'https://direct.yandex.ru/campaigns/108',clicks:140,leads:4,bid:30}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(680,25,'ok'), lcpHistory:H(2950,90,'ok') },
+  { id:7,  productName:'Потребительский кредит',    url:'tbank.ru/loans/consumer',        status:'down', priority:'critical', devices:dev('Desktop Chrome','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 14:23', owner:'Петров С.', type:'availability', error:'502 Bad Gateway', duration:'12 мин', loss:184500, leadsLost:8, cpl:1250, stopLossLimit:50000, campaigns:[{name:'Поиск_Кредит',status:'Активна',spend:21500,url:'https://direct.yandex.ru/campaigns/109',clicks:226,leads:14,bid:95},{name:'РСЯ_Кредит',status:'Активна',spend:14800,url:'https://direct.yandex.ru/campaigns/110',clicks:269,leads:10,bid:55}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(420,20,'zero',5), lcpHistory:H(1800,80,'zero',5) },
+  { id:8,  productName:'Автокредит',                url:'tbank.ru/loans/auto',            status:'ok', priority:'high',     devices:dev(), ttfb:410, lcp:1820, lastIncident:'2026-11-02 19:30', owner:'Петров С.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1310, stopLossLimit:50000, campaigns:[{name:'Поиск_Авто',status:'Активна',spend:11200,url:'https://direct.yandex.ru/campaigns/111',clicks:140,leads:9,bid:80}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(410,18,'ok'), lcpHistory:H(1820,65,'ok') },
+  { id:9,  productName:'Ипотека: Новостройки',      url:'tbank.ru/loans/mortgage-new',    status:'down', priority:'critical', devices:dev('Mobile Safari','down'), ttfb:0, lcp:0, lastIncident:'2026-11-04 14:25', owner:'Козлов Д.',  type:'functionality', error:'Form#app-form not found', duration:'10 мин', loss:267300, leadsLost:6, cpl:2100, stopLossLimit:50000, campaigns:[{name:'Поиск_Ипотека',status:'Активна',spend:32600,url:'https://direct.yandex.ru/campaigns/112',clicks:217,leads:12,bid:150}], fixStatus:'В работе', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,18,'zero',6), lcpHistory:H(1700,70,'zero',6) },
+  { id:10, productName:'СмартВклад',                url:'tbank.ru/deposits/smart',        status:'ok', priority:'high',     devices:dev(), ttfb:380, lcp:1650, lastIncident:'2026-11-03 05:20', owner:'Морозов И.',  type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:740,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Вклады',status:'Активна',spend:8900,url:'https://direct.yandex.ru/campaigns/113',clicks:247,leads:8,bid:36}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(380,16,'ok'), lcpHistory:H(1650,60,'ok') },
+  { id:11, productName:'Накопительный счет',        url:'tbank.ru/deposits/accumulative', status:'degraded', priority:'high', devices:dev('Mobile Chrome','degraded'), ttfb:1650, lcp:3800, lastIncident:'2026-11-04 12:45', owner:'Морозов И.', type:'speed', error:'TTFB > 1500 мс', duration:'100 мин', loss:28700, leadsLost:2, cpl:950, stopLossLimit:50000, campaigns:[{name:'РСЯ_Накопительный',status:'Активна',spend:6700,url:'https://direct.yandex.ru/campaigns/114',clicks:216,leads:6,bid:31}], fixStatus:'На проверке', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(350,25,'rise'), lcpHistory:H(1600,75,'rise') },
+  { id:12, productName:'Брокерский счет',           url:'tbank.ru/invest/broker',         status:'ok', priority:'medium',   devices:dev(), ttfb:510, lcp:2280, lastIncident:'2026-10-31 12:15', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1620, stopLossLimit:50000, campaigns:[{name:'Поиск_Брокер',status:'Активна',spend:10400,url:'https://direct.yandex.ru/campaigns/115',clicks:118,leads:7,bid:88}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(510,20,'ok'), lcpHistory:H(2280,75,'ok') },
+  { id:13, productName:'ИИС',                       url:'tbank.ru/invest/iis',            status:'ok', priority:'medium',   devices:dev(), ttfb:610, lcp:2680, lastIncident:'2026-11-02 09:15', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1540, stopLossLimit:50000, campaigns:[{name:'РСЯ_ИИС',status:'Активна',spend:7800,url:'https://direct.yandex.ru/campaigns/116',clicks:166,leads:5,bid:47}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(610,22,'ok'), lcpHistory:H(2680,85,'ok') },
+  { id:14, productName:'РКО для бизнеса',           url:'tbank.ru/business/rko',          status:'maintenance', priority:'high', devices:dev(null,null,'maintenance'), ttfb:0, lcp:0, lastIncident:'—', owner:'Козлов Д.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:2200, stopLossLimit:50000, campaigns:[{name:'Поиск_РКО',status:'Активна',spend:13500,url:'https://direct.yandex.ru/campaigns/117',clicks:123,leads:6,bid:110}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:{devices:dev(), ttfb:400, lcp:1800}, mwEnd:'14:00', mwStartRaw:'2026-11-04T10:00', mwEndRaw:'2026-11-04T14:00', ttfbHistory:H(400,18,'zero',8), lcpHistory:H(1800,70,'zero',8) },
+  { id:15, productName:'Эквайринг для бизнеса',     url:'tbank.ru/business/acquiring',    status:'ok', priority:'medium',   devices:dev(), ttfb:620, lcp:2720, lastIncident:'2026-10-26 08:50', owner:'Козлов Д.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1980, stopLossLimit:50000, campaigns:[{name:'РСЯ_Эквайринг',status:'Активна',spend:9200,url:'https://direct.yandex.ru/campaigns/118',clicks:177,leads:5,bid:52}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(620,22,'ok'), lcpHistory:H(2720,85,'ok') },
+  { id:16, productName:'ОСАГО',                     url:'tbank.ru/insurance/osago',       status:'ok', priority:'medium',   devices:dev(), ttfb:460, lcp:2050, lastIncident:'2026-11-03 22:10', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:880,  stopLossLimit:30000, campaigns:[{name:'Поиск_ОСАГО',status:'Активна',spend:7600,url:'https://direct.yandex.ru/campaigns/119',clicks:131,leads:8,bid:58}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(460,18,'ok'), lcpHistory:H(2050,70,'ok') },
+  { id:17, productName:'Страхование имущества',     url:'tbank.ru/insurance/property',    status:'maintenance', priority:'low', devices:dev(null,null,'maintenance'), ttfb:0, lcp:0, lastIncident:'—', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:760, stopLossLimit:30000, campaigns:[{name:'РСЯ_Имущество',status:'Активна',spend:5100,url:'https://direct.yandex.ru/campaigns/120',clicks:176,leads:4,bid:29}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:{devices:dev(), ttfb:520, lcp:2300}, mwEnd:'16:30', mwStartRaw:'2026-11-04T12:00', mwEndRaw:'2026-11-04T16:30', ttfbHistory:H(520,20,'zero',9), lcpHistory:H(2300,75,'zero',9) },
+  { id:18, productName:'Мобильная связь',           url:'tbank.ru/mobile',                status:'ok', priority:'medium',   devices:dev(), ttfb:350, lcp:1550, lastIncident:'—', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:640,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Связь',status:'Активна',spend:4800,url:'https://direct.yandex.ru/campaigns/121',clicks:171,leads:6,bid:28}], fixStatus:null, takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(350,14,'ok'), lcpHistory:H(1550,55,'ok') },
+  { id:19, productName:'Премиум-обслуживание',      url:'tbank.ru/premium',               status:'ok', priority:'high',     devices:dev(), ttfb:390, lcp:1720, lastIncident:'2026-11-01 11:20', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1750, stopLossLimit:50000, campaigns:[{name:'Поиск_Премиум',status:'Активна',spend:12800,url:'https://direct.yandex.ru/campaigns/122',clicks:111,leads:7,bid:115}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(390,16,'ok'), lcpHistory:H(1720,60,'ok') },
+  { id:20, productName:'Рефинансирование кредитов', url:'tbank.ru/loans/refinance',       status:'ok', priority:'high',     devices:dev(), ttfb:470, lcp:2080, lastIncident:'2026-10-27 16:40', owner:'Петров С.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1120, stopLossLimit:50000, campaigns:[{name:'РСЯ_Рефинанс',status:'Активна',spend:8300,url:'https://direct.yandex.ru/campaigns/123',clicks:189,leads:6,bid:44}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(470,18,'ok'), lcpHistory:H(2080,70,'ok') },
+  { id:21, productName:'Металлический счет',        url:'tbank.ru/invest/metals',         status:'ok', priority:'low',      devices:dev(), ttfb:640, lcp:2820, lastIncident:'—', owner:'Сидорова М.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1490, stopLossLimit:50000, campaigns:[{name:'РСЯ_Металлы',status:'Активна',spend:6400,url:'https://direct.yandex.ru/campaigns/124',clicks:160,leads:3,bid:40}], fixStatus:null, takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(640,24,'ok'), lcpHistory:H(2820,85,'ok') },
+  { id:22, productName:'Карта Platinum',            url:'tbank.ru/cards/platinum',        status:'ok', priority:'critical', devices:dev(), ttfb:290, lcp:1320, lastIncident:'2026-10-25 09:40', owner:'Иванов А.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1380, stopLossLimit:50000, campaigns:[{name:'Поиск_Платинум',status:'Активна',spend:11900,url:'https://direct.yandex.ru/campaigns/125',clicks:113,leads:8,bid:105},{name:'РСЯ_Платинум',status:'Активна',spend:9600,url:'https://direct.yandex.ru/campaigns/126',clicks:200,leads:6,bid:48}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(290,12,'ok'), lcpHistory:H(1320,50,'ok') },
+  { id:23, productName:'Кредит для бизнеса',        url:'tbank.ru/business/loans',        status:'degraded', priority:'medium', devices:dev('Yandex Browser','degraded'), ttfb:980, lcp:2600, lastIncident:'2026-11-04 11:05', owner:'Козлов Д.', type:'security', error:'SSL cert expires in 3 days', duration:'3 ч 30 м', loss:9400, leadsLost:1, cpl:1800, stopLossLimit:50000, campaigns:[{name:'Поиск_Бизнес',status:'Активна',spend:10800,url:'https://direct.yandex.ru/campaigns/127',clicks:117,leads:4,bid:92}], fixStatus:'Новый', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(500,20,'rise'), lcpHistory:H(2100,70,'rise') },
+  { id:24, productName:'Страхование путешествий',   url:'tbank.ru/insurance/travel',      status:'ok', priority:'low',      devices:dev(), ttfb:560, lcp:2450, lastIncident:'2026-10-24 13:25', owner:'Новикова Е.', type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:920,  stopLossLimit:30000, campaigns:[{name:'РСЯ_Travel',status:'Активна',spend:5900,url:'https://direct.yandex.ru/campaigns/128',clicks:184,leads:5,bid:32}], fixStatus:'Исправлен', takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(560,20,'ok'), lcpHistory:H(2450,75,'ok') },
+  { id:25, productName:'Зарплатный проект',         url:'tbank.ru/business/salary',       status:'ok', priority:'low',      devices:dev(), ttfb:590, lcp:2560, lastIncident:'—', owner:'Козлов Д.',   type:null, error:null, duration:null, loss:0, leadsLost:0, cpl:1660, stopLossLimit:50000, campaigns:[{name:'РСЯ_Зарплатный',status:'Активна',spend:7200,url:'https://direct.yandex.ru/campaigns/129',clicks:157,leads:4,bid:46}], fixStatus:null, takenAt:null, escalated:false, snapshot:null, mwEnd:null, mwStartRaw:null, mwEndRaw:null, ttfbHistory:H(590,22,'ok'), lcpHistory:H(2560,80,'ok') }
+];
+
+const STATUS_META = {
+  ok:          { label: 'OK',          cls: 'badge-ok' },
+  degraded:    { label: 'Degraded',    cls: 'badge-degraded' },
+  down:        { label: 'Down',        cls: 'badge-down' },
+  maintenance: { label: 'Maintenance', cls: 'badge-maint' }
+};
+const PRIORITY_META = {
+  critical: { label: 'Critical', cls: 'priority-critical' },
+  high:     { label: 'High',     cls: 'priority-high' },
+  medium:   { label: 'Medium',   cls: 'priority-medium' },
+  low:      { label: 'Low',      cls: 'priority-low' }
+};
+const FIX_META = { 'Новый':'fix-new', 'В работе':'fix-work', 'На проверке':'fix-check', 'Исправлен':'fix-done' };
+const TYPE_LABELS = { availability:'Доступность', functionality:'Функциональность', speed:'Скорость', security:'Безопасность' };
+const CAUSE_PHRASE = {
+  availability: 'сбои сервера',
+  functionality: 'ошибки форм',
+  speed: 'медленная загрузка',
+  security: 'проблемы с SSL-сертификатом'
+};
+
+let currentSort = { field: 'priority', dir: 'asc' };
+let currentDetailId = null;
+let hoveredKpiCard = null;
+const campOpen = {};
+const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+const statusOrder = { down: 0, degraded: 1, maintenance: 2, ok: 3 };
+const TECH_KPIS = ['uptime', 'coverage', 'mtta', 'mttr'];
+
+function campOpenSet(id) {
+  if (!campOpen[id]) campOpen[id] = new Set();
+  return campOpen[id];
+}
+
+function activeLandings() {
+  return LANDINGS.filter(function(l) { return l.status === 'down' || l.status === 'degraded'; });
+}
+function mainCausePhrase() {
+  const active = activeLandings();
+  const counts = {};
+  active.forEach(function(l) { if (l.type) counts[l.type] = (counts[l.type] || 0) + 1; });
+  let mainType = null, maxC = 0;
+  Object.keys(counts).forEach(function(k) {
+    if (counts[k] > maxC) { maxC = counts[k]; mainType = k; }
+  });
+  return mainType ? CAUSE_PHRASE[mainType] : null;
+}
+function renderKpi() {
+  const active = activeLandings();
+  const lossSum = active.reduce(function(s, l) { return s + l.loss; }, 0);
+  const leadsSum = active.reduce(function(s, l) { return s + l.leadsLost; }, 0);
+  const campSum = active.reduce(function(s, l) { return s + l.campaigns.length; }, 0);
+  const cplAvg = active.length ? Math.round(active.reduce(function(s, l) { return s + l.cpl; }, 0) / active.length) : 0;
+  const lostProfit = leadsSum * LTV_PER_LEAD;
+  const totalClicks = active.reduce(function(s, l) {
+    return s + l.campaigns.reduce(function(cs, c) { return cs + c.clicks; }, 0);
+  }, 0);
+  const cr = totalClicks > 0 ? (leadsSum / totalClicks * 100) : 0;
+  const crit = active.filter(function(l) { return l.priority === 'critical'; }).length;
+  const high = active.filter(function(l) { return l.priority === 'high'; }).length;
+  const other = active.length - crit - high;
+
+  document.getElementById('kpi-incidents').textContent = active.length;
+  document.getElementById('kpi-incidents-sub').textContent = crit + ' Critical · ' + high + ' High · ' + other + ' Medium/Low';
+  document.getElementById('kpi-loss').textContent = lossSum ? fmtMoney(lossSum) : '0 ₽';
+  const cause = mainCausePhrase();
+  document.getElementById('kpi-loss-sub').textContent = cause ? ('Главная причина: ' + cause) : 'нет активных инцидентов';
+  document.getElementById('kpi-lost-profit').textContent = lostProfit ? fmtMoney(lostProfit) : '0 ₽';
+  document.getElementById('kpi-leads').textContent = leadsSum + ' шт.';
+  document.getElementById('kpi-cr').textContent = cr > 0 ? cr.toFixed(2) + '%' : '0%';
+  document.getElementById('kpi-cpl').textContent = cplAvg ? cplAvg.toLocaleString('ru-RU') + ' ₽' : '—';
+  document.getElementById('kpi-campaigns').textContent = campSum + ' шт.';
+  document.getElementById('kpi-coverage').innerHTML = LANDINGS.length + '<span style="font-size:14px;color:var(--gray)">/' + LANDINGS.length + '</span>';
+}
+
+function resampleArray(arr, n) {
+  if (arr.length === 0) return new Array(n).fill(0);
+  if (arr.length === n) return arr.slice();
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    const srcIdx = (i / (n - 1)) * (arr.length - 1);
+    const lo = Math.floor(srcIdx);
+    const hi = Math.min(arr.length - 1, lo + 1);
+    const t = srcIdx - lo;
+    result.push(arr[lo] * (1 - t) + arr[hi] * t);
+  }
+  return result;
+}
+
+function computeCurrentKpiValues() {
+  const active = activeLandings();
+  const lossSum = active.reduce(function(s, l) { return s + l.loss; }, 0);
+  const leadsSum = active.reduce(function(s, l) { return s + l.leadsLost; }, 0);
+  const campSum = active.reduce(function(s, l) { return s + l.campaigns.length; }, 0);
+  const cplAvg = active.length ? Math.round(active.reduce(function(s, l) { return s + l.cpl; }, 0) / active.length) : 0;
+  const lostProfit = leadsSum * LTV_PER_LEAD;
+  const totalClicks = active.reduce(function(s, l) {
+    return s + l.campaigns.reduce(function(cs, c) { return cs + c.clicks; }, 0);
+  }, 0);
+  const cr = totalClicks > 0 ? (leadsSum / totalClicks * 100) : 0;
+  return {
+    loss: lossSum,
+    leads: leadsSum,
+    campaigns: campSum,
+    cpl: cplAvg,
+    lostProfit: lostProfit,
+    cr: cr,
+    incidents: active.length,
+    uptime: 99.94,
+    coverage: LANDINGS.length,
+    mtta: 12,
+    mttr: 38
+  };
+}
+
+function computeIncidentsHistory(points) {
+  const historyLen = 12;
+  const base = [];
+  for (let i = 0; i < historyLen; i++) {
+    let count = 0;
+    LANDINGS.forEach(function(l) {
+      const ttfb = l.ttfbHistory[i] || 0;
+      const lcp = l.lcpHistory[i] || 0;
+      if ((ttfb === 0 && lcp === 0 && (l.status === 'down' || l.status === 'maintenance')) ||
+          ttfb > 1500 || lcp > 4000) {
+        count++;
+      }
+    });
+    base.push(count);
+  }
+  const resampled = resampleArray(base, points);
+  return resampled.map(function(v) { return Math.max(0, Math.round(v)); });
+}
+
+function computeTrendedHistory(kpiKey, points, finalValue) {
+  const active = activeLandings();
+  let template = [];
+  if (active.length > 0) {
+    const keyLanding = active.reduce(function(a, b) { return (a.loss >= b.loss) ? a : b; }, active[0]);
+    template = keyLanding.ttfbHistory.slice();
+  } else {
+    template = new Array(12).fill(1);
+  }
+  const minT = Math.min.apply(null, template);
+  const maxT = Math.max.apply(null, template);
+  const rangeT = maxT - minT || 1;
+  const normTemplate = template.map(function(v) { return (v - minT) / rangeT; });
+  const resampled = resampleArray(normTemplate, points);
+
+  let startRatio;
+  if (kpiKey === 'loss' || kpiKey === 'leads' || kpiKey === 'incidents' || kpiKey === 'lostProfit') startRatio = 0.15;
+  else if (kpiKey === 'campaigns') startRatio = 0.4;
+  else if (kpiKey === 'cpl') startRatio = 0.85;
+  else if (kpiKey === 'cr') startRatio = 0.3;
+  else startRatio = 0.5;
+
+  const baseValue = finalValue * startRatio;
+  const arr = resampled.map(function(t) {
+    return baseValue + (finalValue - baseValue) * t;
+  });
+  arr[points - 1] = finalValue;
+  return arr;
+}
+
+function computeUptimeHistory(points, finalValue) {
+  const arr = [];
+  for (let i = 0; i < points; i++) {
+    const t = i / (points - 1);
+    const v = 100 - (100 - finalValue) * t;
+    const noise = Math.sin(i * 1.7 + 3) * 0.015 * (1 - t);
+    arr.push(Math.round((v + noise) * 100) / 100);
+  }
+  arr[points - 1] = finalValue;
+  return arr;
+}
+
+function computeCoverageHistory(points, finalValue) {
+  const arr = [];
+  const startVal = Math.max(1, finalValue - 8);
+  for (let i = 0; i < points; i++) {
+    const t = i / (points - 1);
+    const v = startVal + (finalValue - startVal) * Math.pow(t, 0.5);
+    const noise = Math.sin(i * 1.3) * 0.3;
+    arr.push(Math.round(v + noise));
+  }
+  arr[points - 1] = finalValue;
+  return arr;
+}
+
+function computeDownwardHistory(points, finalValue, startValue) {
+  const arr = [];
+  for (let i = 0; i < points; i++) {
+    const t = i / (points - 1);
+    const v = startValue + (finalValue - startValue) * Math.pow(t, 0.7);
+    const noise = Math.sin(i * 1.5 + 1) * 1.5 * (1 - t);
+    arr.push(Math.max(1, Math.round(v + noise)));
+  }
+  arr[points - 1] = finalValue;
+  return arr;
+}
+
+function getKpiHistory(kpiKey, days) {
+  const cv = computeCurrentKpiValues();
+  if (kpiKey === 'incidents') {
+    const hist = computeIncidentsHistory(days);
+    hist[days - 1] = cv.incidents;
+    return hist;
+  }
+  if (kpiKey === 'loss' || kpiKey === 'leads' || kpiKey === 'campaigns' || kpiKey === 'lostProfit') {
+    return computeTrendedHistory(kpiKey, days, cv[kpiKey]);
+  }
+  if (kpiKey === 'cpl' || kpiKey === 'cr') {
+    return computeTrendedHistory(kpiKey, days, cv[kpiKey]);
+  }
+  if (kpiKey === 'uptime') return computeUptimeHistory(days, cv.uptime);
+  if (kpiKey === 'coverage') return computeCoverageHistory(days, cv.coverage);
+  if (kpiKey === 'mtta') return computeDownwardHistory(days, cv.mtta, 28);
+  if (kpiKey === 'mttr') return computeDownwardHistory(days, cv.mttr, 82);
+  return new Array(days).fill(0);
+}
+
+function formatKpiValue(kpiKey, v) {
+  if (kpiKey === 'loss' || kpiKey === 'cpl' || kpiKey === 'lostProfit') return fmtMoney(v);
+  if (kpiKey === 'leads' || kpiKey === 'campaigns' || kpiKey === 'incidents' || kpiKey === 'coverage') {
+    return fmtNumber(v);
+  }
+  if (kpiKey === 'cr') return v.toFixed(2) + '%';
+  if (kpiKey === 'uptime') return v.toFixed(2) + '%';
+  if (kpiKey === 'mtta' || kpiKey === 'mttr') return Math.round(v) + ' мин';
+  return Math.round(v);
+}
+
+function formatPeriodLabel(days, idx) {
+  if (days === 7) return 'День ' + (idx + 1);
+  if (days === 30) return 'День ' + (idx + 1);
+  if (days === 90) return 'Неделя ' + (Math.floor(idx / (90 / 13)) + 1);
+  return 'Точка ' + (idx + 1);
+}
+
+function drawKpiChart(cardElement, kpiKey, period, highlightIndex) {
+  if (!cardElement) return;
+  const canvas = cardElement.querySelector('.kpi-sparkline');
+  if (!canvas) return;
+  const data = getKpiHistory(kpiKey, period);
+  if (!data || !data.length) return;
+
+  const colors = getThemeColors();
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth || 200;
+  const cssH = 80;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.scale(dpr, dpr);
+
+  const vals = data.map(function(v) { return Number(v); });
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  const range = max - min || 1;
+  const paddedMax = max + range * 0.25;
+  const paddedMin = Math.max(0, min - range * 0.25);
+  const denom = paddedMax - paddedMin;
+  const n = data.length;
+  const stepX = cssW / Math.max(1, n - 1);
+
+  const pts = data.map(function(v, i) {
+    return { x: i * stepX, y: cssH - ((v - paddedMin) / denom) * cssH * 0.85, v: v, i: i };
+  });
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, cssH);
+  gradient.addColorStop(0, colors.chartFill);
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, cssH);
+  ctx.lineTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const xc = (pts[i].x + pts[i + 1].x) / 2;
+    const yc = (pts[i].y + pts[i + 1].y) / 2;
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+  }
+  if (pts.length > 1) ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+  ctx.lineTo(pts[pts.length - 1].x, cssH);
+  ctx.closePath();
+  ctx.fill();
+
+  const currentVal = pts[pts.length - 1].v;
+  const currentY = cssH - ((currentVal - paddedMin) / denom) * cssH * 0.85;
+  ctx.strokeStyle = colors.chartDash;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, currentY);
+  ctx.lineTo(cssW, currentY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = colors.chartLine;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const xc = (pts[i].x + pts[i + 1].x) / 2;
+    const yc = (pts[i].y + pts[i + 1].y) / 2;
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+  }
+  if (pts.length > 1) ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+  ctx.stroke();
+
+  cardElement._kpiChartData = { pts: pts, kpiKey: kpiKey, period: period, color: colors.chartLine };
+
+  if (typeof highlightIndex === 'number' && highlightIndex >= 0 && highlightIndex < pts.length) {
+    const p = pts[highlightIndex];
+    ctx.strokeStyle = colors.chartDash;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(p.x, 0);
+    ctx.lineTo(p.x, cssH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = colors.chartLine;
+    ctx.strokeStyle = colors.white;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+function setPeriodActive(card, period) {
+  card.querySelectorAll('.kpi-period').forEach(function(sp) {
+    sp.classList.toggle('active', Number(sp.dataset.period) === period);
+  });
+}
+
+function hideChartTooltip() {
+  const tt = document.getElementById('chart-tooltip');
+  if (tt) tt.style.display = 'none';
+}
+
+function showChartTooltip(card, index, clientX) {
+  const data = card._kpiChartData;
+  if (!data || !data.pts[index]) return;
+  const pt = data.pts[index];
+  const tt = document.getElementById('chart-tooltip');
+  const valueStr = formatKpiValue(data.kpiKey, pt.v);
+  const label = formatPeriodLabel(data.period, index);
+  
+  let changeStr = '';
+  let changeClass = '';
+  if (index > 0) {
+    const prevVal = data.pts[index - 1].v;
+    const change = pt.v - prevVal;
+    const changePct = prevVal !== 0 ? (change / Math.abs(prevVal) * 100) : 0;
+    const sign = change >= 0 ? '+' : '';
+    changeStr = sign + formatKpiValue(data.kpiKey, change) + ' (' + sign + changePct.toFixed(1) + '%)';
+    changeClass = change >= 0 ? 'positive' : 'negative';
+  }
+  
+  tt.innerHTML = '<div class="tt-date">' + label + '</div>' +
+    '<div class="tt-row"><span class="tt-label">Значение</span><span class="tt-value">' + valueStr + '</span></div>' +
+    (changeStr ? '<div class="tt-row"><span class="tt-label">Изменение</span><span class="tt-change ' + changeClass + '">' + changeStr + '</span></div>' : '');
+  
+  const canvas = card.querySelector('.kpi-sparkline');
+  const rect = canvas.getBoundingClientRect();
+  const scale = canvas.offsetWidth / (canvas.width / (window.devicePixelRatio || 1));
+  const px = rect.left + pt.x * scale + 15;
+  const py = rect.top + pt.y * scale - 10;
+  tt.style.left = px + 'px';
+  tt.style.top = py + 'px';
+  tt.style.display = 'block';
+}
+
+document.querySelectorAll('.kpi-card[data-kpi]').forEach(function(card) {
+  card.addEventListener('mouseenter', function() {
+    hoveredKpiCard = card;
+    const active = card.querySelector('.kpi-period.active');
+    const p = active ? Number(active.dataset.period) : 7;
+    setPeriodActive(card, p);
+    drawKpiChart(card, card.dataset.kpi, p, null);
+  });
+  card.addEventListener('mouseleave', function() {
+    if (hoveredKpiCard === card) hoveredKpiCard = null;
+    hideChartTooltip();
+  });
+
+  const canvas = card.querySelector('.kpi-sparkline');
+  if (canvas) {
+    canvas.addEventListener('mousemove', function(e) {
+      const data = card._kpiChartData;
+      if (!data) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      let nearest = 0;
+      let minDist = Infinity;
+      data.pts.forEach(function(p, i) {
+        const d = Math.abs(p.x - mx);
+        if (d < minDist) { minDist = d; nearest = i; }
+      });
+      const active = card.querySelector('.kpi-period.active');
+      const p = active ? Number(active.dataset.period) : 7;
+      drawKpiChart(card, card.dataset.kpi, p, nearest);
+      showChartTooltip(card, nearest, e.clientX);
+    });
+    canvas.addEventListener('mouseleave', function() {
+      const active = card.querySelector('.kpi-period.active');
+      const p = active ? Number(active.dataset.period) : 7;
+      drawKpiChart(card, card.dataset.kpi, p, null);
+      hideChartTooltip();
+    });
+  }
+});
+
+document.querySelectorAll('.kpi-period').forEach(function(periodEl) {
+  periodEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const card = periodEl.closest('.kpi-card');
+    if (!card) return;
+    const p = Number(periodEl.dataset.period);
+    setPeriodActive(card, p);
+    drawKpiChart(card, card.dataset.kpi, p, null);
+    hideChartTooltip();
+  });
+});
+
+function problemCount(l) {
+  return l.devices.filter(function(d) { return d.status === 'down' || d.status === 'degraded'; }).length;
+}
+function getFilteredData() {
+  const fStatus = document.getElementById('f-status').value;
+  const fPriority = document.getElementById('f-priority').value;
+  const fDevice = document.getElementById('f-device').value;
+  const fType = document.getElementById('f-type').value;
+  const fSearch = document.getElementById('f-search').value.trim().toLowerCase();
+  return LANDINGS.filter(function(l) {
+    if (fStatus && l.status !== fStatus) return false;
+    if (fPriority && l.priority !== fPriority) return false;
+    if (fDevice) {
+      const d = l.devices.find(function(x) { return x.name === fDevice; });
+      if (!d || (d.status !== 'down' && d.status !== 'degraded')) return false;
+    }
+    if (fType && l.type !== fType) return false;
+    if (fSearch && !(l.url.toLowerCase().includes(fSearch) || l.productName.toLowerCase().includes(fSearch))) return false;
+    return true;
+  });
+}
+function sortData(data) {
+  const field = currentSort.field, dir = currentSort.dir;
+  return data.slice().sort(function(a, b) {
+    let va, vb;
+    if (field === 'status') { va = statusOrder[a.status]; vb = statusOrder[b.status]; }
+    else if (field === 'priority') { va = priorityOrder[a.priority]; vb = priorityOrder[b.priority]; }
+    else if (field === 'devices') { va = problemCount(a); vb = problemCount(b); }
+    else if (field === 'ttfb' || field === 'lcp' || field === 'loss') { va = a[field] || 0; vb = b[field] || 0; }
+    else if (field === 'lastIncident') { va = a.lastIncident || '9999'; vb = b.lastIncident || '9999'; }
+    else { va = String(a[field] || '').toLowerCase(); vb = String(b[field] || '').toLowerCase(); }
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+function getSortIcon(field) {
+  if (currentSort.field !== field) return '↕';
+  return currentSort.dir === 'asc' ? '↑' : '↓';
+}
+
+function deviceCellHtml(l) {
+  const dots = l.devices.map(function(d) {
+    return '<span class="dev-dot dot-' + d.status + '" title="' + d.name + ': ' + STATUS_META[d.status].label + '"></span>';
+  }).join('');
+  let text;
+  if (l.status === 'maintenance') text = 'Плановые работы';
+  else {
+    const problems = l.devices.filter(function(d) { return d.status === 'down' || d.status === 'degraded'; });
+    text = problems.length === 0 ? '5/5 OK' : problems.map(function(d) { return DEV_SHORT[d.name] + ': ' + STATUS_META[d.status].label; }).join(', ');
+  }
+  return '<div class="dev-cell"><span class="dev-dots">' + dots + '</span><span>' + text + '</span></div>';
+}
+function fixBadgeHtml(l) {
+  if (l.fixStatus && FIX_META[l.fixStatus]) return '<span class="fix-badge ' + FIX_META[l.fixStatus] + '">' + l.fixStatus + '</span>';
+  return '<span class="fix-badge fix-new">—</span>';
+}
+function lossCellHtml(l) {
+  const titleAttr = (l.loss > 0 && l.error) ? ' title="Причина: ' + l.error + '"' : '';
+  return '<td class="metric-cell' + (l.loss > 0 ? ' bad' : '') + '"' + titleAttr + '>' + (l.loss ? fmtMoney(l.loss) : '—') + '</td>';
+}
+function renderTable() {
+  const data = sortData(getFilteredData());
+  const tbody = document.getElementById('table-body');
+  const cardView = document.getElementById('card-view');
+  document.getElementById('filter-count').textContent = 'Показано: ' + data.length;
+
+  document.querySelectorAll('th[data-sort]').forEach(function(th) {
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = getSortIcon(th.dataset.sort);
+    th.classList.toggle('sorted', currentSort.field === th.dataset.sort);
+  });
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state">Ничего не найдено. Измените фильтры или поисковый запрос.</div></td></tr>';
+  } else {
+    tbody.innerHTML = data.map(function(l) {
+      const sm = STATUS_META[l.status], pm = PRIORITY_META[l.priority];
+      const ttfbCls = l.ttfb === 0 ? '' : (l.ttfb < 800 ? 'good' : (l.ttfb < 1500 ? 'warn' : 'bad'));
+      const lcpCls = l.lcp === 0 ? '' : (l.lcp < 2500 ? 'good' : (l.lcp < 4000 ? 'warn' : 'bad'));
+      return '<tr onclick="openDetail(' + l.id + ')">' +
+        '<td><span class="badge ' + sm.cls + '"><span class="badge-dot"></span>' + sm.label + '</span></td>' +
+        '<td><div class="product-cell">' + l.productName + '</div></td>' +
+        '<td><div class="url-cell" title="' + l.url + '">' + l.url + '</div></td>' +
+        '<td><span class="priority-badge ' + pm.cls + '">' + pm.label + '</span></td>' +
+        '<td>' + deviceCellHtml(l) + '</td>' +
+        '<td class="metric-cell ' + ttfbCls + '">' + (l.ttfb ? l.ttfb + ' мс' : '—') + '</td>' +
+        '<td class="metric-cell ' + lcpCls + '">' + (l.lcp ? l.lcp + ' мс' : '—') + '</td>' +
+        lossCellHtml(l) +
+        '<td style="font-size:12px;color:var(--gray)">' + l.lastIncident + '</td>' +
+        '<td>' + l.owner + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  cardView.innerHTML = data.map(function(l) {
+    const sm = STATUS_META[l.status], pm = PRIORITY_META[l.priority];
+    return '<div class="landing-card ' + l.status + '" onclick="openDetail(' + l.id + ')">' +
+      '<div class="card-row card-head"><span class="card-title">' + l.productName + '</span>' +
+        '<span class="badge ' + sm.cls + '" style="font-size:11px"><span class="badge-dot"></span>' + sm.label + '</span></div>' +
+      '<div class="card-row"><span class="card-label">URL</span><span class="card-value" style="font-family:monospace;font-size:11px">' + l.url + '</span></div>' +
+      '<div class="card-row"><span class="card-label">Приоритет</span><span class="priority-badge ' + pm.cls + '">' + pm.label + '</span></div>' +
+      '<div class="card-row"><span class="card-label">Устройства</span><span class="card-value">' + deviceCellHtml(l) + '</span></div>' +
+      '<div class="card-row"><span class="card-label">TTFB / LCP</span><span class="card-value">' + (l.ttfb ? l.ttfb + 'мс' : '—') + ' / ' + (l.lcp ? l.lcp + 'мс' : '—') + '</span></div>' +
+      '<div class="card-row"><span class="card-label">Потери</span><span class="card-value">' + (l.loss ? fmtMoney(l.loss) : '—') + '</span></div>' +
+      '<div class="card-row"><span class="card-label">Владелец</span><span class="card-value">' + l.owner + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+document.querySelectorAll('th[data-sort]').forEach(function(th) {
+  th.addEventListener('click', function() {
+    const field = th.dataset.sort;
+    if (currentSort.field === field) currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    else { currentSort.field = field; currentSort.dir = 'asc'; }
+    renderTable();
+  });
+});
+['f-status','f-priority','f-device','f-type','f-search'].forEach(function(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', renderTable);
+  el.addEventListener('change', renderTable);
+});
+
+function allPaused(l) { return l.campaigns.every(function(c) { return c.status === 'Приостановлена'; }); }
+
+function openCampaign(event, url) {
+  event.stopPropagation();
+  window.open(url || 'https://direct.yandex.ru', '_blank');
+}
+
+function toggleAccordion(idx) {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  const set = campOpenSet(l.id);
+  const acc = document.querySelector('#d-campaigns .campaign-accordion[data-idx="' + idx + '"]');
+  if (!acc) return;
+  if (set.has(idx)) { set.delete(idx); acc.classList.remove('open'); }
+  else { set.add(idx); acc.classList.add('open'); }
+}
+
+function renderCampaigns(l) {
+  const set = campOpenSet(l.id);
+  const wrap = document.getElementById('d-campaigns');
+  wrap.innerHTML = l.campaigns.map(function(c, i) {
+    const checked = (c.status === 'Активна') ? ' checked' : '';
+    const openCls = set.has(i) ? ' open' : '';
+    return '<div class="campaign-accordion' + openCls + '" data-idx="' + i + '">' +
+      '<div class="campaign-header" onclick="toggleAccordion(' + i + ')">' +
+        '<span class="camp-name">' + c.name + '</span>' +
+        '<span class="camp-spend">' + fmtMoney(c.spend) + '</span>' +
+        '<label class="toggle-switch" title="' + (c.status === 'Активна' ? 'Кампания активна' : 'Кампания приостановлена') + '" onclick="event.stopPropagation()">' +
+          '<input type="checkbox"' + checked + ' onchange="toggleCampaign(' + i + ')" aria-label="Переключить кампанию ' + c.name + '">' +
+          '<span class="toggle-slider"></span>' +
+        '</label>' +
+        '<span class="acc-arrow">▼</span>' +
+      '</div>' +
+      '<div class="campaign-body">' +
+        '<div class="camp-metrics">' +
+          '<div class="camp-metric"><div class="camp-metric-label">Расход</div><div class="camp-metric-value">' + fmtMoney(c.spend) + '</div></div>' +
+          '<div class="camp-metric"><div class="camp-metric-label">Клики</div><div class="camp-metric-value">' + c.clicks.toLocaleString('ru-RU') + '</div></div>' +
+          '<div class="camp-metric"><div class="camp-metric-label">Лиды</div><div class="camp-metric-value">' + c.leads + '</div></div>' +
+          '<div class="camp-metric"><div class="camp-metric-label">Текущая ставка</div><div class="camp-metric-value">' + c.bid + ' ₽</div></div>' +
+        '</div>' +
+        '<button class="camp-link-btn" onclick="openCampaign(event, \'' + c.url + '\')">Перейти в Яндекс.Директ</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  const btn = document.getElementById('d-traffic-btn');
+  if (allPaused(l)) { btn.textContent = 'Возобновить весь трафик'; btn.className = 'traffic-btn traffic-resume'; }
+  else { btn.textContent = 'Остановить весь трафик'; btn.className = 'traffic-btn traffic-stop'; }
+}
+
+function toggleCampaign(campIndex) {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  const c = l.campaigns[campIndex];
+  if (!c) return;
+  c.status = (c.status === 'Активна') ? 'Приостановлена' : 'Активна';
+  renderCampaigns(l);
+  renderKpi();
+  showToast('Кампания ' + c.name + ': ' + (c.status === 'Активна' ? 'возобновлена' : 'приостановлена'));
+}
+
+function toggleTraffic() {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  if (allPaused(l)) {
+    l.campaigns.forEach(function(c) { c.status = 'Активна'; });
+    showToast('Трафик возобновлён: все кампании активны');
+  } else {
+    l.campaigns.forEach(function(c) { c.status = 'Приостановлена'; });
+    showToast('Трафик остановлен: счётчик потерь зафиксирован');
+  }
+  renderCampaigns(l);
+  renderKpi();
+}
+
+function renderStopLoss(l, skipInput) {
+  const pct = Math.min(100, Math.round(l.loss / l.stopLossLimit * 100));
+  document.getElementById('d-stoploss-text').textContent = 'Потери: ' + fmtMoney(l.loss) + ' / ' + fmtMoney(l.stopLossLimit);
+  const fill = document.getElementById('d-stoploss-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 80 ? 'var(--down)' : (pct >= 50 ? 'var(--degraded)' : 'var(--yellow-dark)');
+  if (!skipInput) document.getElementById('d-stoploss-input').value = l.stopLossLimit;
+}
+function pulseBar() {
+  const bar = document.getElementById('d-stoploss-bar');
+  bar.classList.remove('pulse');
+  void bar.offsetWidth;
+  bar.classList.add('pulse');
+}
+function checkStopLoss(l, withToast) {
+  if (l.loss > l.stopLossLimit && !allPaused(l)) {
+    l.campaigns.forEach(function(c) { c.status = 'Приостановлена'; });
+    renderCampaigns(l);
+    if (withToast) showToast('Стоп-лосс: превышен лимит, все кампании автоматически приостановлены');
+    return true;
+  }
+  return false;
+}
+function updateLimit(v) {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  l.stopLossLimit = Math.max(1000, Number(v) || 1000);
+  renderStopLoss(l, true);
+  pulseBar();
+  checkStopLoss(l, true);
+}
+
+function openDetail(id) {
+  const l = LANDINGS.find(function(x) { return x.id === id; });
+  if (!l) return;
+  currentDetailId = id;
+  const sm = STATUS_META[l.status];
+
+  document.getElementById('d-title').textContent = l.productName;
+  document.getElementById('d-url').textContent = l.url;
+  document.getElementById('d-status').innerHTML =
+    '<span class="badge ' + sm.cls + '" style="font-size:14px;padding:6px 14px"><span class="badge-dot"></span>' + sm.label + '</span>';
+  document.getElementById('d-fix').innerHTML = fixBadgeHtml(l);
+  document.getElementById('d-escalated').style.display = (l.escalated && l.status !== 'ok') ? 'block' : 'none';
+  document.getElementById('d-error').textContent = l.error || '—';
+  document.getElementById('d-type').textContent = l.type ? TYPE_LABELS[l.type] : '—';
+  document.getElementById('d-time').textContent = l.lastIncident || '—';
+  document.getElementById('d-duration').textContent = l.duration || '—';
+  document.getElementById('d-owner').textContent = l.owner;
+  document.getElementById('d-loss').textContent = l.loss
+    ? fmtMoney(l.loss) + (l.error ? ' (Причина: ' + l.error + ')' : '')
+    : '—';
+
+  document.getElementById('d-matrix').innerHTML = l.devices.map(function(d) {
+    const ds = STATUS_META[d.status];
+    return '<div class="matrix-row"><span>' + d.name + '</span><span class="badge ' + ds.cls + '"><span class="badge-dot"></span>' + ds.label + '</span></div>';
+  }).join('');
+
+  renderCampaigns(l);
+  renderStopLoss(l, false);
+
+  const ackBtn = document.getElementById('btn-ack');
+  const takenNote = document.getElementById('d-taken');
+  if (l.takenAt) {
+    ackBtn.disabled = true;
+    takenNote.style.display = 'block';
+    takenNote.textContent = 'Взято в работу в ' + l.takenAt;
+  } else {
+    ackBtn.disabled = false;
+    takenNote.style.display = 'none';
+  }
+
+  const actions = document.getElementById('detail-actions');
+  const maintActions = document.getElementById('maint-actions');
+  const note = document.getElementById('d-maint');
+  if (l.status === 'ok') {
+    actions.style.display = 'none';
+    maintActions.style.display = 'none';
+    note.style.display = 'block';
+    note.className = 'maint-note ok-note';
+    note.innerHTML = 'Лендинг работает штатно. Активных инцидентов нет.';
+  } else if (l.status === 'maintenance') {
+    actions.style.display = 'none';
+    maintActions.style.display = 'grid';
+    note.style.display = 'block';
+    note.className = 'maint-note';
+    note.innerHTML = 'Идут плановые работы. Алерты отключены.<br>Окончание: <b>' + (l.mwEnd || '—') + '</b>';
+  } else {
+    actions.style.display = '';
+    maintActions.style.display = 'none';
+    note.style.display = 'none';
+    note.className = 'maint-note';
+  }
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+  drawSparkline(l.ttfbHistory, l.lcpHistory);
+}
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  currentDetailId = null;
+}
+
+function takeWork() {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l || l.takenAt) return;
+  l.takenAt = nowTime();
+  l.fixStatus = 'В работе';
+  document.getElementById('btn-ack').disabled = true;
+  const note = document.getElementById('d-taken');
+  note.style.display = 'block';
+  note.textContent = 'Взято в работу в ' + l.takenAt;
+  document.getElementById('d-fix').innerHTML = fixBadgeHtml(l);
+  renderTable();
+  showToast('Инцидент взят в работу');
+}
+function escalate() {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  l.escalated = true;
+  document.getElementById('d-escalated').style.display = 'block';
+  showToast('Эскалация: инцидент передан руководителю IT');
+}
+function falsePositive() {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  l.status = 'ok';
+  l.loss = 0;
+  l.leadsLost = 0;
+  l.devices = dev();
+  l.error = null;
+  l.type = null;
+  l.fixStatus = 'Исправлен';
+  l.takenAt = null;
+  l.escalated = false;
+  renderTable();
+  renderKpi();
+  openDetail(l.id);
+  showToast('Ложное срабатывание: статус OK, потери обнулены');
+}
+
+function drawSparkline(ttfb, lcp) {
+  const canvas = document.getElementById('sparkline');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const colors = getThemeColors();
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth || 600;
+  const cssH = 80;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  const w = cssW, h = cssH;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(dpr, dpr);
+
+  const n = ttfb.length;
+  const stepX = w / (n - 1);
+
+  function drawSeries(data, color) {
+    const vals = data.filter(function(v) { return v > 0; });
+    if (!vals.length) return;
+    const min = Math.min.apply(null, vals);
+    const max = Math.max.apply(null, vals);
+    const range = max - min || 1;
+    const paddedMax = max + range * 0.2;
+    const paddedMin = Math.max(0, min - range * 0.2);
+    const denom = paddedMax - paddedMin;
+
+    function yOf(v) { return h - ((v - paddedMin) / denom) * h * 0.9; }
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    let started = false;
+    data.forEach(function(v, i) {
+      if (v === 0) { started = false; return; }
+      const x = i * stepX;
+      const y = yOf(v);
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    data.forEach(function(v, i) {
+      if (v === 0) return;
+      const x = i * stepX;
+      const y = yOf(v);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  drawSeries(ttfb, colors.yellow);
+  drawSeries(lcp, colors.chartLine);
+}
+
+let resizeTimer = null;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    if (hoveredKpiCard && hoveredKpiCard.dataset.kpi) {
+      const active = hoveredKpiCard.querySelector('.kpi-period.active');
+      const p = active ? Number(active.dataset.period) : 7;
+      drawKpiChart(hoveredKpiCard, hoveredKpiCard.dataset.kpi, p, null);
+    }
+    if (currentDetailId) {
+      const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+      if (l) drawSparkline(l.ttfbHistory, l.lcpHistory);
+    }
+  }, 150);
+});
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
+}
+
+function openMwModal(preselectId) {
+  const select = document.getElementById('mw-landing');
+  select.innerHTML = '<option value="">— выберите —</option>' +
+    LANDINGS.map(function(l) { return '<option value="' + l.id + '">' + l.productName + ' — ' + l.url + '</option>'; }).join('');
+  if (preselectId) select.value = String(preselectId);
+  const pre = preselectId ? LANDINGS.find(function(x) { return x.id === preselectId; }) : null;
+  const now = new Date();
+  const later = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const fmt = function(d) { return d.toISOString().slice(0, 16); };
+  document.getElementById('mw-start').value = (pre && pre.mwStartRaw) ? pre.mwStartRaw : fmt(now);
+  document.getElementById('mw-end-input').value = (pre && pre.mwEndRaw) ? pre.mwEndRaw : fmt(later);
+  document.getElementById('mw-modal').classList.add('open');
+}
+function openMwFromDetail() { openMwModal(currentDetailId); }
+function editMw() { openMwModal(currentDetailId); }
+function closeMwModal() { document.getElementById('mw-modal').classList.remove('open'); }
+function saveMw() {
+  const idVal = document.getElementById('mw-landing').value;
+  const start = document.getElementById('mw-start').value;
+  const end = document.getElementById('mw-end-input').value;
+  if (!idVal || !start || !end) { showToast('Заполните все поля'); return; }
+  const id = parseInt(idVal, 10);
+  const l = LANDINGS.find(function(x) { return x.id === id; });
+  if (!l) { showToast('Лендинг не найден'); return; }
+  if (l.status !== 'maintenance') {
+    l.snapshot = { devices: l.devices, ttfb: l.ttfb, lcp: l.lcp };
+  }
+  l.status = 'maintenance';
+  l.mwStartRaw = start;
+  l.mwEndRaw = end;
+  l.mwEnd = fmtMwEnd(end);
+  l.devices = dev(null, null, 'maintenance');
+  l.ttfb = 0;
+  l.lcp = 0;
+  closeMwModal();
+  renderTable();
+  renderKpi();
+  if (currentDetailId === id) openDetail(id);
+  showToast('Плановые работы: ' + l.productName + ' до ' + l.mwEnd);
+}
+function cancelMw() {
+  const l = LANDINGS.find(function(x) { return x.id === currentDetailId; });
+  if (!l) return;
+  l.status = 'ok';
+  l.mwEnd = null;
+  l.mwStartRaw = null;
+  l.mwEndRaw = null;
+  if (l.snapshot) {
+    l.devices = l.snapshot.devices;
+    l.ttfb = l.snapshot.ttfb;
+    l.lcp = l.snapshot.lcp;
+    l.snapshot = null;
+  } else {
+    l.devices = dev();
+  }
+  renderTable();
+  renderKpi();
+  openDetail(l.id);
+  showToast('Плановые работы отменены: ' + l.productName);
+}
+document.getElementById('mw-modal').addEventListener('click', function(e) {
+  if (e.target.id === 'mw-modal') closeMwModal();
+});
+
+function openLogoutModal() { document.getElementById('logout-modal').classList.add('open'); }
+function closeLogoutModal() { document.getElementById('logout-modal').classList.remove('open'); }
+document.getElementById('logout-cancel').addEventListener('click', closeLogoutModal);
+document.getElementById('logout-confirm').addEventListener('click', function() {
+  closeLogoutModal();
+  showToast('Вы вышли из системы');
+});
+document.getElementById('logout-modal').addEventListener('click', function(e) {
+  if (e.target.id === 'logout-modal') closeLogoutModal();
+});
+
+const userBadge = document.getElementById('user-badge');
+const userMenu = document.getElementById('user-menu');
+const reportsToggle = document.getElementById('reports-toggle');
+const reportsSubmenu = document.getElementById('reports-submenu');
+userBadge.addEventListener('click', function(e) { e.stopPropagation(); userMenu.classList.toggle('open'); });
+reportsToggle.addEventListener('click', function(e) { e.stopPropagation(); reportsSubmenu.classList.toggle('open'); });
+document.addEventListener('click', function(e) {
+  if (!userMenu.contains(e.target)) { userMenu.classList.remove('open'); reportsSubmenu.classList.remove('open'); }
+});
+document.querySelectorAll('.dropdown-item[data-action]').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const action = item.dataset.action;
+    if (action === 'logout') {
+      userMenu.classList.remove('open'); reportsSubmenu.classList.remove('open');
+      openLogoutModal();
+      return;
+    }
+    if (action === 'mw') {
+      userMenu.classList.remove('open'); reportsSubmenu.classList.remove('open');
+      openMwModal(null);
+      return;
+    }
+    const messages = { profile:'Открыт профиль пользователя', settings:'Открыты настройки системы', csv:'Отчет CSV сформирован', pdf:'Отчет PDF сформирован' };
+    showToast(messages[action] || 'Действие выполнено');
+    userMenu.classList.remove('open'); reportsSubmenu.classList.remove('open');
+  });
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDetail();
+    closeMwModal();
+    closeLogoutModal();
+    userMenu.classList.remove('open');
+    reportsSubmenu.classList.remove('open');
+    hideChartTooltip();
+  }
+});
+
+LANDINGS.forEach(function(l) { checkStopLoss(l, false); });
+renderKpi();
+renderTable();
+</script>
+</body>
+</html>
